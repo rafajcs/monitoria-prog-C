@@ -1,0 +1,65 @@
+\documentclass[12pt,a4paper,oneside]{extreport}
+
+\input{preambulo.tex}
+
+\title{\huge Apostila de Preparação para Programação \textbf{C}}
+\author{Rafael Coelho}
+%\date{July 2026}
+
+\begin{document}
+\maketitle
+
+\chapter*{Prefácio}
+\addcontentsline{toc}{chapter}{Prefácio}
+
+A linguagem C ocupa um papel fundamental na formação de profissionais da Computação. Embora linguagens modernas ofereçam mecanismos que abstraem diversos detalhes da implementação, compreender como um programa é executado, como os dados são organizados na memória e como os recursos do computador são utilizados continua sendo uma habilidade indispensável para quem deseja construir uma base sólida em programação.
+
+Esta apostila foi elaborada como material de apoio às monitorias da disciplina de Linguagem C. Seu propósito não é substituir as aulas ou os livros clássicos da área, mas complementar o processo de aprendizagem por meio de explicações objetivas, exemplos comentados, diagramas de memória, exercícios progressivos e observações sobre os erros mais frequentes encontrados pelos estudantes.
+
+Ao longo dos capítulos, a linguagem será apresentada não apenas como uma ferramenta para escrever código, mas como um meio para compreender os fundamentos da programação e o funcionamento interno dos computadores. Sempre que possível, os conceitos serão relacionados a situações práticas e acompanhados de representações visuais que auxiliem na construção de um modelo mental consistente sobre a execução dos programas.
+
+Espera-se que este material sirva como um roteiro de estudos para alunos que desejam consolidar os conhecimentos adquiridos em sala de aula, preparar-se para avaliações e, principalmente, desenvolver uma compreensão mais profunda dos princípios que fundamentam a programação em baixo nível.
+
+\vspace{1cm}
+
+\begin{flushright}
+\textit{Bom estudo!}
+\end{flushright}
+
+\chapter*{Como utilizar esta apostila}
+\addcontentsline{toc}{chapter}{Como utilizar esta apostila}
+
+\tableofcontents
+\newpage
+
+\part{Fundamentos de C}
+
+\input{capitulos/01-introducao.tex}
+\input{capitulos/02-variaveis-tipos-operadores.tex}
+
+% TODO: Include remaining chapters as they are developed
+%\input{capitulos/03-controle-fluxo.tex}
+%\input{capitulos/04-funcoes.tex}
+
+\part{Organização dos Dados}
+%\input{capitulos/05-vetores.tex}
+%\input{capitulos/06-strings.tex}
+
+\part{Gerenciamento de Memória}
+%\input{capitulos/07-structs-enums.tex}
+%\input{capitulos/08-ponteiros.tex}
+%\input{capitulos/09-alocacao-dinamica.tex}
+
+\part{Programação Modular e Avançada}
+%\input{capitulos/10-modularizacao.tex}
+%\input{capitulos/11-estruturas-dados.tex}
+%\input{capitulos/12-recursao.tex}
+%\input{capitulos/13-bit-a-bit.tex}
+%\input{capitulos/14-depuracao.tex}
+
+\appendix
+\part{Apêndices}
+\chapter{Perguntas Frequentes}
+\chapter{Erros Clássicos em C}
+
+\end{document}

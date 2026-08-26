@@ -1,0 +1,150 @@
+% Pacotes essenciais
+\usepackage{graphicx}
+
+% Fontes
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Pagella}
+
+% Idioma
+\usepackage[brazil]{babel}
+
+% Margens
+\usepackage[
+    left=3cm,
+    right=2.5cm,
+    top=2.5cm,
+    bottom=3cm
+]{geometry}
+
+% Espaçamento
+\usepackage{setspace}
+\onehalfspacing
+
+% Microtipografia
+\usepackage{microtype}
+
+% Cabeçalhos e Rodapés
+\usepackage{fancyhdr}
+\setlength{\headheight}{16pt}
+\pagestyle{fancy}
+\fancyhf{} % Limpa
+\fancyhead[R]{{\leftmark}}
+\fancyhead[L]{\textbf{Apostila de Programação C}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Primeira página de cada capítulo
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+% Hyperref
+\usepackage[hidelinks]{hyperref}
+
+% Pacote de Códigos
+\usepackage{listings}
+\lstset{
+    language=C,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    frame=single,
+    breaklines=true
+}
+
+% Cores
+\usepackage{xcolor}
+\definecolor{titulo}{RGB}{20,55,120}
+
+% Caixas (tcolorbox)
+\usepackage[most]{tcolorbox}
+
+% Definições de Caixas Pedagógicas
+\newtcolorbox{observacao}[1][]{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    title=Observação,
+    fonttitle=\bfseries,
+    #1
+}
+
+\newtcolorbox{importante}[1][]{
+    colback=red!5!white,
+    colframe=red!75!black,
+    title=Importante,
+    fonttitle=\bfseries,
+    #1
+}
+
+\newtcolorbox{curiosidade}[1][]{
+    colback=green!5!white,
+    colframe=green!50!black,
+    title=Curiosidade,
+    fonttitle=\bfseries,
+    #1
+}
+
+\newtcolorbox{errocomum}[1][]{
+    colback=orange!5!white,
+    colframe=orange!80!black,
+    title=Erro Comum,
+    fonttitle=\bfseries,
+    #1
+}
+
+\newtcolorbox{objetivos}[1][]{
+    colback=gray!5!white,
+    colframe=gray!50!black,
+    title=Objetivos de Aprendizagem,
+    fonttitle=\bfseries,
+    #1
+}
+
+\newtcolorbox{resumo}[1][]{
+    colback=yellow!5!white,
+    colframe=yellow!60!black,
+    title=Resumo,
+    fonttitle=\bfseries,
+    #1
+}
+
+\newtcolorbox{exercicio}[1][]{
+    colback=purple!5!white,
+    colframe=purple!50!black,
+    title=Exercício,
+    fonttitle=\bfseries,
+    #1
+}
+
+\newtcolorbox{desafio}[1][]{
+    colback=black!5!white,
+    colframe=black!80!white,
+    title=Desafio,
+    fonttitle=\bfseries,
+    #1
+}
+
+\newtcolorbox{terminal}[1][]{
+    colback=black!90!white,
+    colframe=black,
+    coltext=white,
+    fontupper=\ttfamily,
+    title=Terminal,
+    fonttitle=\bfseries,
+    #1
+}
+
+% Títulos
+\usepackage{titlesec}
+\titleformat{\chapter}
+{\Huge\bfseries\color{titulo}}
+{\thechapter}
+{1em}
+{}
+
+\setlength{\parskip}{0.4em}
