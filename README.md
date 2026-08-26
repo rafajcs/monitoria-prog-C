@@ -1,6 +1,6 @@
-# Apostila e Material de Monitoria de Linguagem C
+# Material de Monitoria de Programação C
 
-Este repositório reúne o material complementar utilizado para as monitorias da disciplina de Linguagem C. O projeto foi elaborado para auxiliar alunos que já possuem experiência prévia com programação (especialmente Python) na transição para a linguagem C.
+Este repositório reúne o material complementar utilizado para as monitorias da disciplina de Programação C. O projeto foi elaborado para auxiliar alunos que já possuem experiência prévia com programação (especialmente Python) na transição para a linguagem C.
 
 A proposta pedagógica deste repositório não é apenas ensinar a sintaxe do C, mas também instigar os alunos a entenderem o que acontece por baixo dos panos (representação em memória, alocação, etc).
 
