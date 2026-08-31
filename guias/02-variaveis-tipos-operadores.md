@@ -1,3 +1,12 @@
+---
+layout: default
+title: 2. Variáveis, Tipos e Operadores
+---
+
+[⬅️ Anterior: Introdução](01-introducao.md) | [🏠 Início](../README.md)
+
+---
+
 # 2. Variáveis, Tipos e Operadores
 
 ## O que você precisa saber
