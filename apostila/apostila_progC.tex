@@ -1,0 +1,997 @@
+\documentclass[12pt,a4paper,oneside]{extreport}
+\usepackage{graphicx} % Required for inserting images
+
+% Fontes
+\usepackage{fontspec}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+%\setmainfont{TeX Gyre Pagella}
+%\setmainfont{Palatino Linotype}
+
+% Idioma
+\usepackage[brazil]{babel}
+
+% Margens
+\usepackage[
+    left=3cm,
+    right=2.5cm,
+    top=2.5cm,
+    bottom=3cm
+]{geometry}
+
+% Espac
+\usepackage{setspace}
+\onehalfspacing
+
+% Microtipografia
+\usepackage{microtype}
+
+%========================================
+% Cabeçalhos e Rodapés
+%========================================
+\usepackage{fancyhdr}
+
+\setlength{\headheight}{16pt}
+
+\pagestyle{fancy}
+
+% Limpa configurações padrão
+\fancyhf{}
+
+% Cabeçalho
+\fancyhead[R]{{\leftmark}}
+\fancyhead[L]{\textbf{Apostila de Programação C}}
+
+% Linha do cabeçalho
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Sem linha no rodapé
+\renewcommand{\footrulewidth}{0pt}
+
+% Primeira página de cada capítulo
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+%hyper
+\usepackage[hidelinks]{hyperref}
+
+
+% Pacote codigos
+\usepackage{listings}
+
+\lstset{
+language=C,
+basicstyle=\ttfamily\small,
+keywordstyle=\color{blue},
+commentstyle=\color{green!60!black},
+stringstyle=\color{red},
+numbers=left,
+numberstyle=\tiny,
+frame=single,
+breaklines=true
+}
+
+
+% Caixa obs
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{listings,skins,breakable}
+
+% Cores
+\usepackage{xcolor}
+
+\definecolor{titulo}{RGB}{20,55,120}
+
+\setlength{\parskip}{0.4em}
+
+%========================================
+% Terminal Linux
+%========================================
+
+\newtcblisting{terminal}{
+    listing only,
+    listing options={
+        basicstyle=\ttfamily\small,
+        language={},
+        breaklines=true
+    },
+    colback=black!95,
+    frame hidden,
+    coltext=green,
+    arc=2mm,
+    left=2mm,
+    right=2mm,
+    top=1mm,
+    bottom=1mm
+}
+
+%========================================
+% Resumo
+%========================================
+\newtcolorbox{resumo}{
+    enhanced,
+    breakable,
+    colback=gray!10,
+    colframe=gray!60,
+    title=\textbf{Resumo do Capítulo},
+    fonttitle=\bfseries}
+
+%========================================
+% Observação
+%========================================
+\newtcolorbox{observacao}{
+    enhanced,
+    breakable,
+    colback=blue!5,
+    colframe=blue!60!black,
+    title=\textbf{Observação},
+    fonttitle=\bfseries
+}
+
+%========================================
+% Importante
+%========================================
+\newtcolorbox{importante}{
+    enhanced,
+    breakable,
+    colback=yellow!8,
+    colframe=orange!80!black,
+    title=\textbf{Importante},
+    fonttitle=\bfseries
+}
+
+%========================================
+% Curiosidade
+%========================================
+\newtcolorbox{curiosidade}{
+    enhanced,
+    breakable,
+    colback=green!5,
+    colframe=green!50!black,
+    title=\textbf{Curiosidade},
+    fonttitle=\bfseries
+}
+
+%========================================
+% Objetivos
+%========================================
+\newtcolorbox{objetivos}{
+    enhanced,
+    breakable,
+    colback=cyan!5,
+    colframe=cyan!60!black,
+    title=\textbf{Ao final deste capítulo, você deve ser capaz de},
+    fonttitle=\bfseries
+}
+
+%========================================
+% Exercícios
+%========================================
+\newtcolorbox{exercicio}{
+    enhanced,
+    breakable,
+    colback=red!3,
+    colframe=red!60!black,
+    title=\textbf{Exercício},
+    fonttitle=\bfseries
+}
+
+\newtcolorbox{desafio}{
+    enhanced,
+    breakable,
+    colback=purple!5,
+    colframe=purple!70!black,
+    title=\textbf{Desafio},
+    fonttitle=\bfseries
+}
+
+\newtcolorbox{errocomum}{
+    enhanced,
+    breakable,
+    colback=red!5,
+    colframe=red!70!black,
+    title=\textbf{Erro comum},
+    fonttitle=\bfseries
+}
+
+
+%========================TITULO=======================%
+
+\title{\huge Apostila de Preparação para Programação \textbf{C}}
+\author{Rafael Coelho}
+%\date{July 2026}
+
+\usepackage{titlesec}
+
+\titleformat{\chapter}
+{\Huge\bfseries\color{titulo}}
+{\thechapter}
+{1em}
+{}
+
+%=========================Documento============================%
+
+
+\begin{document}
+\maketitle
+
+%===========================Prefácio=============================%
+
+
+\chapter*{Prefácio}
+\addcontentsline{toc}{chapter}{Prefácio}
+
+A linguagem C ocupa um papel fundamental na formação de profissionais da Computação. Embora linguagens modernas ofereçam mecanismos que abstraem diversos detalhes da implementação, compreender como um programa é executado, como os dados são organizados na memória e como os recursos do computador são utilizados continua sendo uma habilidade indispensável para quem deseja construir uma base sólida em programação.
+
+Esta apostila foi elaborada como material de apoio às monitorias da disciplina de Linguagem C. Seu propósito não é substituir as aulas ou os livros clássicos da área, mas complementar o processo de aprendizagem por meio de explicações objetivas, exemplos comentados, diagramas de memória, exercícios progressivos e observações sobre os erros mais frequentes encontrados pelos estudantes.
+
+Ao longo dos capítulos, a linguagem será apresentada não apenas como uma ferramenta para escrever código, mas como um meio para compreender os fundamentos da programação e o funcionamento interno dos computadores. Sempre que possível, os conceitos serão relacionados a situações práticas e acompanhados de representações visuais que auxiliem na construção de um modelo mental consistente sobre a execução dos programas.
+
+Espera-se que este material sirva como um roteiro de estudos para alunos que desejam consolidar os conhecimentos adquiridos em sala de aula, preparar-se para avaliações e, principalmente, desenvolver uma compreensão mais profunda dos princípios que fundamentam a programação em baixo nível.
+
+\vspace{1cm}
+
+\begin{flushright}
+\textit{Bom estudo!}
+\end{flushright}
+
+%=====================Como usar=======================%
+
+\chapter*{Como utilizar esta apostila}
+\addcontentsline{toc}{chapter}{Como utilizar esta apostila}
+
+Esta apostila foi organizada para funcionar como um roteiro de aprendizagem. Em vez de apresentar apenas conceitos e exemplos, cada capítulo segue uma estrutura didática pensada para conduzir o estudante desde a motivação inicial até a aplicação prática do conteúdo.
+
+Cada capítulo inicia com uma breve introdução, contextualizando a importância do tema e sua relação com os assuntos já estudados. Em seguida, o desenvolvimento apresenta os conceitos fundamentais, exemplos comentados e trechos de código que ilustram sua aplicação prática. Sempre que pertinente, caixas de observação, curiosidades e erros comuns destacam informações importantes, aplicações interessantes e equívocos frequentes entre estudantes, especialmente aqueles que estão migrando de linguagens de alto nível, como Python, para a linguagem C.
+
+Ao final de cada capítulo, um resumo sintetiza os principais conceitos estudados, seguido por uma lista de objetivos de aprendizagem que funciona como um checklist para revisão. Por fim, são propostos três exercícios em ordem crescente de dificuldade: o primeiro busca consolidar os conceitos apresentados; o segundo incentiva sua aplicação na resolução de pequenos problemas; e o terceiro propõe um desafio ou reflexão que prepara o terreno para os capítulos seguintes.
+
+Recomenda-se que o leitor acompanhe os exemplos, implemente os programas apresentados e tente resolver os exercícios antes de consultar soluções ou materiais complementares. A aprendizagem da programação ocorre principalmente por meio da prática, da experimentação e da análise dos próprios erros. Esta apostila foi concebida para servir como um guia ao longo desse processo, podendo ser utilizada tanto no estudo individual quanto como material de apoio às monitorias e às disciplinas introdutórias de programação em C.
+
+
+%=====================Sumário=======================%
+
+\tableofcontents
+\newpage
+
+%===============================================%
+
+
+\part{Fundamentos de C}
+
+\chapter{Introdução}
+
+Programar é, antes de tudo, resolver problemas. Em sua essência, um programa de computador nada mais é do que uma sequência organizada de instruções capaz de transformar dados de entrada em resultados úteis. Porém, essa definição simples esconde um aspecto fundamental: computadores não compreendem intenções, ideias ou objetivos. Eles executam apenas instruções elementares, em uma ordem rigorosamente definida, realizando milhões ou até bilhões de operações por segundo.
+
+Ao longo da história da Computação, diferentes linguagens de programação foram desenvolvidas para reduzir a distância entre a forma como os seres humanos pensam e a forma como os computadores executam instruções. Linguagens de alto nível, como Python, permitem que problemas complexos sejam descritos por meio de comandos simples e expressivos, abstraindo detalhes relacionados à organização da memória, ao gerenciamento de recursos e à arquitetura do processador. Essa capacidade torna o desenvolvimento de software mais produtivo e acessível, permitindo que o programador concentre seus esforços na lógica da solução.
+
+Entretanto, compreender apenas essas abstrações é conhecer apenas uma parte do processo. Em diversas áreas da Computação, como sistemas operacionais, compiladores, sistemas embarcados, arquitetura de computadores, processamento de alto desempenho e desenvolvimento de drivers, torna-se necessário compreender como os dados são realmente armazenados, manipulados e transferidos pela máquina. É nesse contexto que a linguagem C assume um papel de destaque.
+
+Desenvolvida no início da década de 1970 por Dennis Ritchie, nos Laboratórios Bell, a linguagem C surgiu com o objetivo de oferecer uma alternativa eficiente e portável para o desenvolvimento do sistema operacional UNIX. Desde então, tornou-se uma das linguagens mais influentes da história da Computação, servindo de base para inúmeras outras linguagens modernas e permanecendo amplamente utilizada em aplicações nas quais desempenho, controle de memória e acesso direto ao \textit{hardware} são requisitos fundamentais.
+
+Estudar C não significa abandonar as facilidades oferecidas pelas linguagens modernas, mas compreender os mecanismos que tornam essas facilidades possíveis. Conceitos como ponteiros, organização da memória, pilha de execução, alocação dinâmica e representação binária dos dados constituem fundamentos presentes, de forma direta ou indireta, em praticamente todas as áreas da Computação. Assim, aprender C representa uma oportunidade de desenvolver uma compreensão mais profunda sobre o funcionamento dos programas e dos computadores.
+
+Ao longo desta apostila, os conceitos serão apresentados de maneira gradual, sempre buscando estabelecer uma relação entre a escrita do código e o comportamento do programa durante sua execução. Sempre que possível, serão utilizados diagramas de memória, exemplos comentados e exercícios progressivos para auxiliar na construção de um modelo mental consistente sobre o funcionamento interno da linguagem.
+
+
+\section{O que significa programar?}
+
+Programar é, antes de tudo, uma forma de resolver problemas. Quando escrevemos um programa, estamos descrevendo, passo a passo, como um computador deve agir para transformar uma entrada em uma saída desejada. Não é sobre "escrever código" no sentido mecânico — é sobre pensar de forma estruturada, quebrar um problema grande em partes menores e traduzir esse raciocínio em instruções que uma máquina consiga executar sem ambiguidade.
+
+Diferente de um ser humano, o computador não interpreta intenções. Ele não "entende" o que você quer dizer, apenas o que você efetivamente escreveu. Por isso, programar exige precisão: cada instrução precisa ser exata, cada condição precisa estar bem definida, cada passo precisa ter uma ordem clara. Essa exigência de rigor é, ao mesmo tempo, o que torna a programação desafiadora no início e extremamente poderosa depois que você domina o processo — porque uma vez que o computador sabe exatamente o que fazer, ele faz isso rapidamente, repetidamente e sem erros de execução.
+
+Aprender a programar, portanto, é menos sobre decorar sintaxe e mais sobre desenvolver uma forma de pensar: o chamado \textbf{pensamento computacional}. É a habilidade de olhar para um problema do mundo real e enxergar nele uma sequência lógica de passos que pode ser automatizada.
+
+
+
+\section{Do problema ao algoritmo}
+
+Antes de qualquer linha de código, existe um problema. E antes de qualquer programa, existe um \textbf{algoritmo}: uma sequência finita e bem definida de passos que resolve esse problema.
+
+Pense em uma tarefa simples do dia a dia, como fazer um café. Existe uma ordem lógica de ações: ferver a água, moer o pó (se necessário), colocar o pó no filtro, despejar a água, esperar coar. Se você trocar a ordem dos passos ou pular algum, o resultado muda ou simplesmente não funciona. Um algoritmo de programação segue a mesma lógica, só que aplicado a problemas computacionais: somar dois números, ordenar uma lista de nomes, verificar se uma senha é válida, calcular a média de notas de uma turma.
+
+O processo de desenvolvimento de software segue, de forma geral, este caminho:
+
+
+\begin{enumerate}
+
+\item \textbf{Entender o problema:} o que exatamente precisa ser resolvido?
+\item \textbf{Projetar o algoritmo:} quais passos, em qual ordem, resolvem esse problema?
+\item \textbf{Implementá-lo:} traduzir o algoritmo para uma linguagem de programação.
+\item \textbf{Testar:} verificar se o programa realmente resolve o problema em diferentes situações.
+
+\end{enumerate}
+
+
+É comum que iniciantes pulem direto para o passo 3, tentando escrever código antes de entender o problema ou pensar no algoritmo. Isso costuma gerar programas confusos e cheios de erros. Uma boa prática — que vamos reforçar ao longo de toda a apostila — é sempre rascunhar o algoritmo antes de programar, seja em português mesmo, seja em pseudocódigo, seja em um simples diagrama.
+
+
+\section{Da linguagem humana à linguagem de máquina}
+
+Nós pensamos e nos comunicamos em linguagem natural: português, inglês, e assim por diante. O computador, por outro lado, só entende sequências de 0s e 1s — a chamada \textbf{linguagem de máquina}. Entre esses dois extremos existe uma escada de abstração, e é nela que as linguagens de programação se encaixam.
+
+\begin{itemize}
+
+    \item No nível mais baixo está o \textbf{código binário}, que o processador executa diretamente.
+    \item Um pouco acima está o \textbf{assembly}, que usa mnemônicos (como `MOV`, `ADD`, `JMP`) para representar instruções de máquina de forma um pouco mais legível para humanos, mas ainda extremamente ligada ao hardware.
+    \item Acima disso estão as \textbf{linguagens de alto nível}, como C, Python, Java, entre outras, que usam palavras e estruturas mais próximas do raciocínio humano.
+    
+\end{itemize}
+
+
+Quando você escreve um programa em C, esse código não é executado diretamente pelo processador. Ele precisa passar por um \textbf{compilador}, um programa que traduz o código-fonte escrito por você para linguagem de máquina, gerando um arquivo executável.
+
+C ocupa uma posição interessante nessa escada: é considerada uma linguagem de \textbf{médio nível}. Ela tem estruturas legíveis para humanos (laços, condicionais, funções), mas também permite manipular a memória do computador de forma bastante direta — algo que linguagens mais modernas costumam esconder do programador. É justamente esse equilíbrio que torna C tão importante de se entender, como veremos a seguir.
+
+
+\section{O surgimento da linguagem C}
+
+A linguagem C foi criada no início da década de 1970 por \textbf{Dennis Ritchie}, nos Laboratórios Bell (Bell Labs), com o objetivo original de desenvolver o sistema operacional \textbf{Unix}. Antes de C, sistemas operacionais eram escritos quase inteiramente em assembly — um processo lento, difícil de manter e completamente dependente do hardware específico de cada máquina.
+
+C nasceu como evolução de linguagens anteriores, como a \textbf{B} (criada por Ken Thompson) e a \textbf{BCPL}. A grande sacada de Ritchie foi criar uma linguagem poderosa o suficiente para escrever um sistema operacional inteiro, mas portável o bastante para rodar em diferentes arquiteturas de hardware sem precisar reescrever tudo do zero.
+
+O sucesso foi tão grande que, em pouco tempo, o próprio Unix foi reescrito em C, e a linguagem se espalhou junto com a adoção do sistema pelo mundo acadêmico e, depois, comercial. Em 1978, Brian Kernighan e Dennis Ritchie publicaram o livro \textit{The C Programming Language}, obra que se tornou referência tão importante que muita gente ainda chama a versão clássica da linguagem de "C K\&R" (Kernighan \& Ritchie).
+
+Com o tempo, C passou por processos de padronização formal — ANSI C (1989), depois ISO C (C90, C99, C11, C17, C23) — garantindo que compiladores diferentes, em sistemas diferentes, interpretassem a linguagem da mesma forma.
+
+\section{Por que estudar C atualmente?}
+
+Se você já programou em Python, provavelmente nunca precisou se preocupar com onde uma variável estava armazenada na memória. Em C, essa preocupação deixa de ser um detalhe e passa a fazer parte da programação. Então, mais de cinquenta anos depois de criada, por qual motivo C continua extremamente relevante? 
+Não é apenas por tradição ou nostalgiam, existem razões práticas concretas:
+
+
+\begin{itemize}
+    \item[--] \textbf{C é a base de grande parte da computação moderna:} Sistemas operacionais, compiladores, bibliotecas e diversas linguagens de programação possuem componentes implementados em C. Compreender a linguagem significa compreender parte dos fundamentos sobre os quais a computação atual foi construída.
+    \item[--] \textbf{C permite compreender o funcionamento interno do computador:} Ao programar em C, passamos a lidar explicitamente com memória, ponteiros, organização dos dados e outros conceitos que normalmente permanecem ocultos em linguagens de alto nível. Essa experiência desenvolve uma compreensão mais profunda sobre como os programas realmente são executados.
+    \item[--] \textbf{C continua essencial em aplicações de baixo nível:} Sistemas embarcados, firmware, drivers de dispositivos, sistemas operacionais e diversas aplicações que exigem controle direto do hardware ainda utilizam C como uma das principais linguagens de desenvolvimento.
+\end{itemize}
+
+Em resumo: você não está aprendendo C apenas para "escrever programas em C". Está aprendendo os fundamentos que sustentam praticamente toda a computação moderna.
+
+
+\section{Estrutura de um programa em C}
+
+Tradicionalmente, o primeiro programa apresentado em uma linguagem de programação é aquele que exibe uma simples mensagem na tela. Embora pareça um exemplo modesto, esse programa reúne os principais elementos estruturais que aparecerão em praticamente todos os programas escritos em C. Por esse motivo, ele será utilizado como ponto de partida para compreender a organização básica de um programa.
+
+\begin{lstlisting}
+#include <stdio.h>
+
+int main(void)
+{
+    printf("Hello, world!\n");
+    return 0;
+}
+\end{lstlisting}
+
+Vamos analisar, a seguir, cada parte desse programa.
+
+\begin{tcolorbox}[title=Curiosidade]
+
+Embora hoje seja tradição iniciar o estudo de uma linguagem de programação
+com um programa que imprime ``Hello, World!'', essa expressão foi
+popularizada por Brian Kernighan. Ela apareceu inicialmente em um exemplo do
+livro \textit{A Tutorial Introduction to the Language B} (1973) e,
+posteriormente, tornou-se mundialmente conhecida por meio do clássico
+\textit{The C Programming Language} (1978), escrito por Brian Kernighan e
+Dennis Ritchie.
+
+\end{tcolorbox}
+
+Usando a numeração das linhas temos em ordem crescente:
+
+\texttt{\#include <stdio.h>} \\
+Essa linha é uma \textbf{diretiva de pré-processador}. Antes mesmo da compilação, ela instrui o pré-processador a incluir o conteúdo da biblioteca padrão de entrada e saída (`stdio.h`, de *standard input/output*), que contém a declaração de funções como `printf` (usada para exibir texto na tela) e `scanf` (usada para ler dados digitados pelo usuário).
+
+\texttt{int main(void)} \\
+Toda execução de um programa em C começa em uma função chamada `main`. É o ponto de entrada de todo programa em C. O `int` antes do nome indica que essa função devolve um número inteiro ao sistema operacional quando termina — normalmente usado para indicar se o programa foi executado com sucesso ou não. O `void` entre parênteses indica que essa função não recebe parâmetros de entrada.
+
+\texttt{\{ ...\}} \\
+As chaves delimitam o corpo da função, isto é, o conjunto de instruções que será executado quando a função for chamada. No caso da função main, esse bloco corresponde ao código executado quando o programa é iniciado.
+
+\texttt{printf("Hello, world!\textbackslash n");} \\
+A função printf é utilizada para exibir informações na tela. Nesse exemplo, ela recebe como argumento a sequência de caracteres "Hello, world!\verb|\n|"., passando como argumento o texto que queremos exibir. O `\verb|\n|` no final é um caractere especial que representa uma quebra de linha. Note o ponto e vírgula (`;`) ao final — em C, ele marca o fim de cada instrução, e sua ausência é um dos erros mais comuns entre iniciantes.
+
+\texttt{return 0;} \\
+Essa linha finaliza a função `main`, devolvendo o valor `0` ao sistema operacional. Por convenção, `0` significa que o programa terminou sem erros. Em programas simples, essa linha costuma aparecer no final da função main. Ao longo da apostila veremos que outras funções também podem utilizar a instrução return para devolver resultados ao programa.
+
+De forma geral, todo programa em C segue este esqueleto:
+
+\begin{lstlisting}
+#include <biblioteca_1>
+#include <biblioteca_2>
+...
+
+int main(void) {
+    // instruções do programa
+    return 0;
+}
+\end{lstlisting}
+
+Naturalmente, programas reais podem conter diversas outras funções, declarações, estruturas de dados e bibliotecas. Entretanto, a estrutura apresentada acima representa o núcleo de um programa em C e servirá como base para os próximos capítulos.
+
+\begin{tcolorbox}[title=Observação]
+
+Neste momento, não se preocupe em memorizar todos os detalhes do programa.
+Ao longo dos próximos capítulos, cada um desses elementos será estudado
+individualmente. O objetivo desta seção é apenas apresentar a estrutura geral
+de um programa em C e familiarizar o leitor com sua organização.
+
+\end{tcolorbox}
+
+
+\section{Compilando o primeiro programa}
+
+Diferente de linguagens interpretadas, um programa em C precisa ser compilado antes de ser executado. O compilador lê o código-fonte (o arquivo `.c` que você escreveu) e gera um arquivo executável, específico para o sistema operacional e a arquitetura de hardware em que foi compilado.
+
+Um dos compiladores mais usados, especialmente em ambientes Linux e no ensino, é o \textbf{GCC} (GNU Compiler Collection). Supondo que você tenha salvo o programa da seção 1.6 em um arquivo chamado `ola\_mundo.c`, o processo básico de compilação e execução no terminal seria:
+
+
+\begin{terminal}
+aluno@ubuntu:~$ gcc ola_mundo.c -o ola_mundo
+
+aluno@ubuntu:~$ ./ola_mundo
+
+\end{terminal}
+
+
+Explicando cada parte:
+
+\begin{tabular}{p{4.4cm}p{10cm}}
+\texttt{gcc} & Invoca o compilador GCC.\\[0.2cm]
+
+\texttt{ola\_mundo.c} &
+Arquivo-fonte que será compilado.\\[0.2cm]
+
+\texttt{-o ola\_mundo} &
+Define o nome do executável gerado.\\[0.2cm]
+
+\texttt{./ola\_mundo} &
+Executa o programa localizado no diretório atual.
+\end{tabular}
+
+
+Assim, se tudo estiver correto, a saída no terminal será:
+
+\begin{terminal}
+Hello, world!
+\end{terminal}
+
+Caso exista algum erro de sintaxe — como esquecer um ponto e vírgula ou uma chave — o compilador vai recusar a compilação e exibir mensagens de erro apontando a linha e o tipo de problema encontrado. Aprender a ler essas mensagens de erro é uma habilidade tão importante quanto aprender a escrever o código em si, e vamos treinar isso bastante ao longo da apostila.
+
+
+\section*{Resumo do Capítulo}
+
+Parabéns! Você acabou de escrever, compilar e executar seu primeiro programa em C. Embora simples, esse exemplo percorreu todas as etapas fundamentais do desenvolvimento: partiu de um arquivo de código-fonte, passou pelo processo de compilação e resultou em um programa executável.
+
+Ao longo do capítulo, você também conheceu o contexto histórico da linguagem C e refletiu sobre o verdadeiro papel da programação: utilizar o computador como ferramenta para resolver problemas por meio de algoritmos.
+
+Nos próximos capítulos, ampliaremos gradualmente essa estrutura, introduzindo variáveis, operadores, estruturas de controle e funções, até que você seja capaz de desenvolver programas cada vez mais completos.
+
+\begin{tcolorbox}[title={Ao final deste capítulo, você deve ser capaz de:}]
+
+\begin{itemize}
+    \item Explicar, em linhas gerais, como surgiu a linguagem C e sua importância histórica.
+    \item Diferenciar algoritmo de programa.
+    \item Identificar os principais componentes da estrutura de um programa em C.
+    \item Compreender o papel das diretivas de pré-processador e da função \texttt{main}.
+    \item Compilar e executar um programa simples utilizando o GCC.
+    \item Interpretar mensagens básicas de erro emitidas pelo compilador.
+\end{itemize}
+
+\end{tcolorbox}
+
+\section*{Erros comuns}
+
+\begin{errocomum}
+
+\textbf{Esquecer o ponto e vírgula (\texttt{;})}
+
+Para quem teve o primeiro contato com programação em Python, é recorrente esquecer o ponto e vírgula ao final das instruções. Em C, praticamente toda instrução deve ser finalizada com \texttt{';'}. Quando isso não acontece, o compilador informa um erro de sintaxe.
+\newline
+\newline \textbf{Python}
+
+\begin{lstlisting}
+print("Betas usam Python.")
+\end{lstlisting}
+
+\textbf{C}
+
+\begin{lstlisting}
+printf("Trivial.");
+\end{lstlisting}
+
+\end{errocomum}
+
+
+\section*{Exercícios}
+
+\begin{exercicio}
+
+\subsection*{Fixação} 
+Explique, com suas palavras, por que a linguagem C continua sendo importante para a formação de um profissional de Computação, mesmo existindo linguagens mais modernas. \newline
+
+\subsection*{Aplicação} 
+Escreva um programa em C que exiba seu nome, idade e cidade que nasceu na tela (com a exata formatação a seguir):
+
+\begin{terminal}
+Rafael, 21
+Aracaju-SE.
+\end{terminal}
+
+Em seguida, compile e execute o programa utilizando o GCC.
+
+\subsection*{Reflexão} 
+Neste capítulo, vimos que um programa em C precisa ser compilado antes de ser executado. Em Python, normalmente basta executar o arquivo diretamente.
+\textbf{Pesquise}, em poucas linhas, qual é a diferença entre uma linguagem compilada e uma linguagem interpretada. Em sua opinião, quais vantagens e desvantagens cada abordagem apresenta?
+    
+\end{exercicio}
+
+    
+
+%----------------------------------------
+
+
+\chapter{Variáveis, Tipos e Operadores}
+
+Todo programa existe para representar informações e operar sobre elas. Se você já teve contato com Python, provavelmente está acostumado a pensar em uma variável simplesmente como "uma caixa que guarda um valor" — você escreve idade = 20 e pronto, o Python descobre sozinho que aquilo é um número inteiro.
+
+Em C, esse raciocínio precisa ser mais preciso. Antes de guardar qualquer valor, precisamos responder três perguntas:
+
+\begin{itemize}
+    \item Qual é o tipo desse dado?
+    \item Quanto espaço ele ocupa na memória?
+    \item Como esse valor é efetivamente representado, em bits, dentro desse espaço?
+\end{itemize}
+
+Essas perguntas podem parecer burocráticas no início, mas são exatamente o que torna C uma linguagem tão próxima do funcionamento real do computador. Neste capítulo, vamos construir a base para pensar em variáveis não como "caixas mágicas", mas como regiões de memória com um tipo bem definido.
+
+\section{Variáveis e Declaração}
+
+Uma variável é um espaço nomeado na memória do computador, usado para armazenar um valor que pode ser lido e modificado durante a execução do programa. Em C, toda variável precisa ser \textbf{declarada} antes de ser usada — ou seja, você precisa informar ao compilador qual é o tipo dela e qual nome ela vai ter.
+
+\begin{lstlisting}
+int idade;
+idade = 20;
+
+int ano = 2026;
+\end{lstlisting}
+
+Note que existem duas ações diferentes acontecendo:
+
+\begin{itemize}
+
+    \item \textbf{Declaração:} \texttt{int idade;} — aqui você está dizendo ao compilador "reserve espaço na memória para um número inteiro chamado idade".
+    \item \textbf{Atribuição:} \texttt{idade = 20;} — aqui você está colocando o valor 20 nesse espaço já reservado.
+
+\end{itemize}
+
+Quando as duas coisas acontecem na mesma linha, como em \texttt{int ano = 2026;}, chamamos isso de inicialização — declaração e atribuição em um único passo. \\
+
+\textbf{Regras para identificadores (nomes de variáveis) em C:}
+
+\begin{enumerate}
+    \item Podem conter letras, dígitos e underscore (\_).
+    \item Não podem começar com um dígito.
+    \item São case-sensitive (idade e Idade são variáveis diferentes).
+    \item Não podem ser palavras reservadas da linguagem (como int, return, if).
+\end{enumerate}
+
+\textbf{A diferença em relação ao Python:} 
+em Python, uma mesma variável pode receber valores de tipos diferentes ao longo do programa (\texttt{x = 10} e depois \texttt{x = "texto"} são ambos válidos). Em C isso não é possível — uma vez declarada com um tipo, a variável só pode armazenar valores compatíveis com aquele tipo durante toda a sua existência.
+
+
+\begin{errocomum}
+
+Declarar uma variável local e tentar usá-la antes de atribuir um valor:
+
+\begin{lstlisting}
+int total;
+printf("%d", total); // comportamento indefinido!
+
+\end{lstlisting}
+
+Diferente de variáveis globais (que começam zeradas automaticamente), variáveis locais não têm um valor inicial garantido. Elas contêm "lixo de memória" — o que quer que estivesse naquele espaço antes. 
+
+\textbf{Sempre} inicialize suas variáveis antes de usá-las.
+
+    
+\end{errocomum}
+
+
+
+\section{Tipos de Dados Fundamentais}
+C possui alguns tipos básicos, chamados de \textbf{tipos primitivos}, que servem de base para tudo o que vamos construir daqui em diante:
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Tipo} & \textbf{Representa} & \textbf{Exemplo} \\
+\hline
+\texttt{char} & um único caractere & \texttt{char letra = 'A';} \\
+\hline
+\texttt{int} & um número inteiro & \texttt{int quantidade = 42;} \\
+\hline
+\texttt{float} & número real (precisão simples) & \texttt{float altura = 1.75f;} \\
+\hline
+\texttt{double} & número real (precisão dupla) & \texttt{double pi = 3.14159265;} \\
+\hline
+\texttt{void} & ausência de tipo/valor & usado principalmente em funções \\
+\hline
+\end{tabular}
+\end{center}
+
+Mais adiante, vamos discutir sobre o tipo \texttt{bool}, que representa valores verdadeiro/falso, em C com mais calma quando chegarmos às estruturas condicionais.
+
+Por enquanto, não vamos nos aprofundar em modificadores como \texttt{short}, \texttt{long}, \texttt{signed} e \texttt{unsigned} — eles merecem atenção própria e voltaremos a eles na Seção~\ref{sec:constantes-modificadores}.
+
+A ideia central desta seção é a seguinte:
+
+\begin{quote}
+\textit{Em C, o tipo faz parte da definição da variável e determina como seus bits devem ser interpretados.}
+\end{quote}
+
+Ou seja: os mesmos 4 bytes na memória podem representar um número inteiro ou um número em ponto flutuante, dependendo exclusivamente do tipo declarado. O tipo não é um detalhe burocrático — é o que dá significado aos bits armazenados.
+
+\section{Representação dos Dados na Memória}
+Este é um dos pontos em que C se diferencia claramente de linguagens de mais alto nível: podemos — e devemos — pensar em como os dados são fisicamente armazenados.
+
+Considere a declaração:
+
+\begin{lstlisting}
+int x = 10;
+\end{lstlisting}
+
+Na maioria dos sistemas atuais, um \texttt{int} ocupa \textbf{4 bytes} (32 bits) de memória. O valor \texttt{10}, representado em binário, fica armazenado assim:
+
+\begin{center}
+\texttt{
+\begin{tabular}{|c|c|c|c|}
+\hline
+00000000 & 00000000 & 00000000 & 00001010 \\
+\hline
+\end{tabular}
+}
+\\[2pt]
+\textit{4 bytes}
+\end{center}
+
+Não vamos entrar em detalhes sobre representação de números negativos (complemento de dois) neste momento — isso terá seu espaço mais à frente. O que importa agora é fixar uma cadeia de raciocínio que vai acompanhar todo o restante da apostila:
+
+\begin{center}
+\textbf{variável $\rightarrow$ tipo $\rightarrow$ bytes $\rightarrow$ memória.}
+\end{center}
+
+Toda variável que você declara reserva um espaço de memória cujo tamanho é determinado pelo seu tipo. Essa ideia é a base sobre a qual construiremos, mais adiante, os capítulos de ponteiros e de \textit{structs} — então vale a pena parar um instante e garantir que essa imagem mental ficou clara antes de avançar.
+
+\section{Constantes e Modificadores}
+\label{sec:constantes-modificadores}
+Às vezes queremos declarar uma variável cujo valor não deve mudar ao longo do programa. Para isso, usamos a palavra-chave \texttt{const}:
+
+\begin{lstlisting}
+const int idade = 20;
+\end{lstlisting}
+
+Qualquer tentativa de modificar \texttt{idade} depois disso resultará em erro de compilação — o que é útil para proteger valores que representam configurações fixas, limites ou constantes matemáticas.
+
+C também oferece \textbf{modificadores de tipo}, que ajustam o tamanho ou a forma como um número é interpretado:
+
+\begin{lstlisting}
+unsigned int  // apenas valores não negativos
+long int      // inteiro com mais bits (maior faixa de valores)
+short int     // inteiro com menos bits (faixa menor)
+\end{lstlisting}
+
+Não vamos nos aprofundar nesses modificadores agora pois eles terão uma seção própria mais adiante, quando discutirmos faixas de valores e \textit{overflow} com mais detalhe.
+
+\section{Operadores}
+Operadores são símbolos que indicam ao compilador que operação deve ser realizada sobre um ou mais valores (chamados de \textit{operandos}).
+
+\subsection{Operadores Aritméticos}
+\begin{lstlisting}
++   soma
+-   subtracao
+*   multiplicacao
+/   divisao
+%   modulo (resto da divisao inteira)
+\end{lstlisting}
+
+\subsection{Operadores Relacionais}
+Usados para comparar dois valores, sempre resultando em verdadeiro (\texttt{1}) ou falso (\texttt{0}):
+
+\begin{lstlisting}
+<    menor que
+>    maior que
+<=   menor ou igual
+>=   maior ou igual
+==   igual a
+!=   diferente de
+\end{lstlisting}
+
+\subsection{Operadores Lógicos}
+Usados para combinar expressões relacionais:
+
+\begin{lstlisting}
+&&   e (AND)
+||   ou (OR)
+!    negacao (NOT)
+\end{lstlisting}
+
+\subsection{Operadores de Atribuição}
+\begin{lstlisting}
+=    atribuicao simples
++=   soma e atribui
+-=   subtrai e atribui
+*=   multiplica e atribui
+/=   divide e atribui
+%=   calcula o modulo e atribui
+\end{lstlisting}
+
+Por exemplo, \texttt{total += 5;} é equivalente a \texttt{total = total + 5;}.
+
+\subsection{Incremento e Decremento}
+\begin{lstlisting}
+++   incremento
+--   decremento
+\end{lstlisting}
+
+\begin{lstlisting}
+i++;
+++i;
+\end{lstlisting}
+
+Vale destacar algo que costuma passar despercebido: \textbf{\texttt{++} é um operador, e não simplesmente uma abreviação textual de \texttt{i = i + 1}}. Essa distinção parece sutil agora, mas vai se tornar muito relevante quando estudarmos ponteiros e a diferença entre as formas pré-fixada (\texttt{++i}) e pós-fixada (\texttt{i++}) em expressões mais complexas, como \texttt{vetor[i++]}.
+
+\section{Conversão de Tipos}
+Em C, é possível — e às vezes necessário — converter um valor de um tipo para outro. Essa conversão é chamada de \textit{casting}.
+
+\begin{lstlisting}
+int a = 5;
+int b = 2;
+
+double resultado = (double) a / b;
+\end{lstlisting}
+
+Aqui está uma diferença importante em relação ao Python: em Python, \texttt{5 / 2} já retorna \texttt{2.5} automaticamente. Em C, \texttt{a / b} — sendo ambos \texttt{int} — realiza uma \textbf{divisão inteira}, descartando a parte decimal e resultando em \texttt{2}. Para obter o resultado com casas decimais, é preciso converter explicitamente um dos operandos para \texttt{double} (ou \texttt{float}) antes da divisão, como feito no exemplo acima.
+
+Conversões também acontecem de forma implícita, quando atribuímos um valor de um tipo a uma variável de outro tipo:
+
+\begin{lstlisting}
+int x = 10;
+double y = x;      // conversao implicita: int -> double (sem perda de dados)
+\end{lstlisting}
+
+\begin{lstlisting}
+double x = 10.5;
+int y = (int) x;    // conversao explicita: double -> int (perde a parte decimal, y = 10)
+\end{lstlisting}
+
+De forma geral, converter de um tipo "menor" para um "maior" (como \texttt{int} para \texttt{double}) é seguro. O caminho inverso pode causar perda de informação, e por isso é uma boa prática torná-lo explícito com um \textit{cast}, como em \texttt{(int) x}.
+
+\section{Entrada e Saída de Dados}
+No Capítulo 1, você já usou a função \texttt{printf} para exibir uma mensagem fixa na tela. Agora que conhecemos variáveis e tipos, podemos usá-la — e sua "parceira" \texttt{scanf} — de forma sistemática, para exibir e ler valores dinâmicos.
+
+\begin{lstlisting}
+printf("%d", idade);
+scanf("%d", &idade);
+\end{lstlisting}
+
+Cada tipo de dado tem um \textbf{especificador de formato} correspondente, usado tanto em \texttt{printf} quanto em \texttt{scanf}:
+
+\begin{lstlisting}
+%d   int
+%f   float
+%lf  double
+%c   char
+%s   string (vetor de char)
+\end{lstlisting}
+
+\begin{errocomum}
+\begin{lstlisting}
+scanf("%d", idade);   // errado
+scanf("%d", &idade);  // correto
+\end{lstlisting}
+O \texttt{scanf} precisa saber \textbf{onde}, na memória, deve escrever o valor lido — e não apenas qual valor a variável tem no momento. Por isso, é necessário passar o \textbf{endereço de memória} da variável, usando o operador \texttt{\&} antes do nome dela. Omitir o \texttt{\&} é um dos erros mais comuns entre quem está começando em C, e o compilador nem sempre vai te avisar com clareza sobre isso.
+\end{errocomum}
+
+Isso naturalmente levanta uma pergunta:
+
+\begin{quote}
+\textit{"Por que preciso colocar \texttt{\&}?"}
+\end{quote}
+
+A resposta completa para essa pergunta pertence ao capítulo sobre ponteiros, mais adiante. Por ora, fica o registro consciente de que existe algo acontecendo por trás dessa sintaxe que ainda vamos explorar em profundidade — é importante não esconder isso do aluno, mas também não se aprofundar antes da hora.
+
+\section{Escopo e Tempo de Vida}
+Toda variável tem um \textbf{escopo} — a região do código onde ela é visível e pode ser usada — e um \textbf{tempo de vida} — o período durante o qual ela existe na memória.
+
+\begin{itemize}
+    \item \textbf{Escopo local:} variáveis declaradas dentro de uma função (ou de um bloco delimitado por chaves) só existem e só podem ser acessadas dentro daquele bloco.
+    \item \textbf{Escopo global:} variáveis declaradas fora de qualquer função, no topo do arquivo, podem ser acessadas por qualquer função do programa.
+\end{itemize}
+
+\begin{lstlisting}
+int contador_global = 0; // escopo global
+
+int main(void) {
+    // escopo local, existe apenas dentro de main
+    int idade_local = 20; 
+    return 0;
+}
+\end{lstlisting}
+
+De forma geral, variáveis locais existem apenas enquanto a função em que foram declaradas está em execução — assim que a função termina, esse espaço de memória é liberado. Variáveis globais, por outro lado, existem durante toda a execução do programa.
+
+
+\section*{Resumo do Capítulo}
+Neste capítulo, deixamos de tratar variáveis como simples "caixas de valores" e passamos a enxergá-las como regiões de memória com tipo, tamanho e representação bem definidos. Vimos os tipos fundamentais de C, como declarar e inicializar variáveis, os principais operadores da linguagem, como converter entre tipos e como realizar entrada e saída básica de dados. Também demos os primeiros passos sobre escopo — um assunto que vai se tornar cada vez mais importante conforme nossos programas crescerem.
+
+\begin{tcolorbox}[title={Ao final deste capítulo, você deve ser capaz de:}]
+\begin{itemize}
+    \item Declarar e inicializar variáveis em C.
+    \item Identificar os principais tipos fundamentais.
+    \item Explicar a relação entre tipos e representação dos dados na memória.
+    \item Utilizar operadores aritméticos, relacionais e lógicos.
+    \item Realizar conversões de tipos.
+    \item Utilizar \texttt{printf} e \texttt{scanf} para entrada e saída simples.
+    \item Diferenciar escopo local e global.
+\end{itemize}
+\end{tcolorbox}
+
+\section*{Exercícios}
+
+\begin{exercicio}
+
+\subsection*{Fixação}
+Declare variáveis de tipos \texttt{int}, \texttt{float} e \texttt{char} para representar, respectivamente, a idade, a altura (em metros) e a inicial do primeiro nome de uma pessoa. Inicialize cada uma com um valor de sua escolha e utilize \texttt{printf} para exibir os três valores na tela, cada um com o especificador de formato adequado.
+
+
+\subsection*{Aplicação}
+Escreva um programa que leia, via \texttt{scanf}, dois números inteiros digitados pelo usuário. O programa deve calcular e exibir a soma, a diferença, o produto e o resto da divisão entre eles.
+
+
+\subsection*{Desafio}
+Analise o programa a seguir:
+
+\begin{lstlisting}
+int a = 5;
+int b = 2;
+
+printf("%d\n", a / b);
+printf("%f\n", (double)a / b);
+\end{lstlisting}
+
+Execute mentalmente (ou compile e rode, se preferir) esse trecho e responda: \textbf{por que as duas operações produzem resultados diferentes?}
+
+Tente formular sua resposta usando os conceitos de tipo e representação de dados discutidos neste capítulo — e não apenas como uma regra decorada sobre operadores.
+
+
+\end{exercicio}
+
+
+
+\begin{tcolorbox}[title=Material Complementar]
+
+Neste capítulo foram utilizados diversos exemplos práticos. As implementações completas, listas adicionais de exercícios, slides da monitoria e perguntas frequentes encontram-se disponíveis no repositório da disciplina.
+
+\end{tcolorbox}
+
+
+
+%----------------------------------------
+
+\chapter{Controle de Fluxo}
+
+\section{Condicionais}
+
+\section{Laços}
+
+%----------------------------------------
+
+\chapter{Funções}
+
+\section{Declaração}
+
+\section{Protótipos}
+
+\section{Passagem por Valor}
+
+
+%----------------------------------------
+
+\part{Organização dos Dados}
+
+\chapter{Vetores}
+
+\chapter{Strings}
+
+\chapter{Arrays Multidimensionais}
+
+%========================================
+
+\part{Gerenciamento de Memória}
+
+
+\chapter{Ponteiros}
+
+% teste codigo
+\begin{lstlisting}
+int x = 10;
+int *p = &x;
+\end{lstlisting}
+
+
+% caixa
+\begin{tcolorbox}[title=Importante]
+
+Nunca utilize um ponteiro sem inicializá-lo.
+
+\end{tcolorbox}
+
+
+\chapter{Organização da Memória}
+
+\section{Segmento de Código}
+
+\section{Stack}
+
+\section{Heap}
+
+\section{Data}
+
+\section{BSS}
+
+
+\chapter{Alocação Dinâmica}
+
+\section*{Exercícios}
+
+
+%========================================
+
+\part{Programação Modular}
+
+\chapter{Structs e Enums}
+
+\chapter{Modularização}
+
+\section{Arquivos Header}
+
+\section{Include Guards}
+
+\section{Compilação Separada}
+
+\section{Linkagem}
+
+\chapter{Estruturas de Dados Básicas}
+
+
+
+%========================================
+
+\part{Tópicos Avançados}
+
+\chapter{Manipulação Bit a Bit}
+
+\chapter{Recursão}
+
+\chapter{Depuração}
+
+%========================================
+
+\appendix
+
+\part{Apêndices}
+
+\chapter{Perguntas Frequentes}
+
+\chapter{Erros Clássicos em C}
+
+\chapter{Questões Comentadas}
+
+
+
+
+\end{document}
