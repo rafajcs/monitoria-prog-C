@@ -23,6 +23,8 @@ O repositório é organizado para separar o material mais detalhado (apostila) d
 - **Guias Rápidos em Markdown**: Acesse a pasta `guias/` para resumos práticos orientados à programação, ideais para visualizar direto no GitHub.
   - [1. Introdução](guias/01-introducao.md)
   - [2. Variáveis, Tipos e Operadores](guias/02-variaveis-tipos-operadores.md)
+  - [3. Controle de Fluxo](guias/03-controle-de-fluxo.md)
+  - [4. Funções](guias/04-funcoes.md)
 - **Onde encontrar os Slides**: Acesse a pasta `slides/` e procure o diretório do capítulo correspondente.
 - **Onde encontrar Exercícios e Códigos**: Navegue em `exercicios/` para testar seus conhecimentos e em `codigos/` para ler e executar os exemplos em C abordados nos capítulos.
 
