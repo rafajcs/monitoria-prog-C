@@ -230,7 +230,7 @@ Esta apostila foi elaborada como material de apoio às monitorias da disciplina 
 
 Ao longo dos capítulos, a linguagem será apresentada não apenas como uma ferramenta para escrever código, mas como um meio para compreender os fundamentos da programação e o funcionamento interno dos computadores. Sempre que possível, os conceitos serão relacionados a situações práticas e acompanhados de representações visuais que auxiliem na construção de um modelo mental consistente sobre a execução dos programas.
 
-Espera-se que este material sirva como um roteiro de estudos para alunos que desejam consolidar os conhecimentos adquiridos em sala de aula, preparar-se para avaliações e, principalmente, desenvolver uma compreensão mais profunda dos princípios que fundamentam a programação em baixo nível.
+Espero que sirva como um bom roteiro de estudos para aqueles que desejam consolidar os conhecimentos adquiridos em sala de aula, preparar-se para avaliações e, principalmente, desenvolver uma compreensão mais profunda dos princípios que fundamentam o mundo maravilhoso da programação baixo nível.
 
 \vspace{1cm}
 
@@ -243,7 +243,7 @@ Espera-se que este material sirva como um roteiro de estudos para alunos que des
 \chapter*{Como utilizar esta apostila}
 \addcontentsline{toc}{chapter}{Como utilizar esta apostila}
 
-Esta apostila foi organizada para funcionar como um roteiro de aprendizagem. Em vez de apresentar apenas conceitos e exemplos, cada capítulo segue uma estrutura didática pensada para conduzir o estudante desde a motivação inicial até a aplicação prática do conteúdo.
+Esta apostila foi organizada para funcionar como um roteiro de aprendizado. Em vez de apresentar apenas conceitos e exemplos, cada capítulo segue uma estrutura didática pensada para conduzir o estudante desde a motivação inicial até a aplicação prática do conteúdo.
 
 Cada capítulo inicia com uma breve introdução, contextualizando a importância do tema e sua relação com os assuntos já estudados. Em seguida, o desenvolvimento apresenta os conceitos fundamentais, exemplos comentados e trechos de código que ilustram sua aplicação prática. Sempre que pertinente, caixas de observação, curiosidades e erros comuns destacam informações importantes, aplicações interessantes e equívocos frequentes entre estudantes, especialmente aqueles que estão migrando de linguagens de alto nível, como Python, para a linguagem C.
 
@@ -884,10 +884,300 @@ Neste capítulo foram utilizados diversos exemplos práticos. As implementaçõe
 
 \chapter{Controle de Fluxo}
 
+Até agora, todos os nossos programas seguiram um caminho único: a execução começa na primeira linha de \texttt{main} e segue, sequencialmente, até a última. Isso é suficiente para calcular expressões e exibir resultados, mas está longe de representar a maioria dos problemas reais. Precisamos que o computador seja capaz de \textbf{tomar decisões} ("se a senha estiver correta, libere o acesso") e de \textbf{repetir ações} ("some cada nota digitada até o usuário informar que terminou").
+
+É exatamente isso que as estruturas de \textbf{controle de fluxo} nos permitem fazer: alterar a ordem natural de execução das instruções, com base em condições que só podem ser avaliadas durante a execução do programa. Neste capítulo, vamos estudar as duas grandes famílias dessas estruturas em C: as \textbf{condicionais}, que desviam o fluxo, e os \textbf{laços} (ou \textit{loops}), que o repetem.
+
 \section{Condicionais}
+
+Estruturas condicionais permitem que um trecho de código seja executado apenas quando uma determinada condição for verdadeira. Em C, uma condição é sempre uma expressão que resulta em um valor: \texttt{0} é considerado falso, e qualquer valor diferente de zero é considerado verdadeiro.
+
+\subsection{A estrutura \texttt{if}}
+
+A forma mais simples de decisão é o \texttt{if}:
+
+\begin{lstlisting}
+int idade = 18;
+
+if (idade >= 18) {
+    printf("Maior de idade\n");
+}
+\end{lstlisting}
+
+O bloco entre chaves só é executado se a condição dentro dos parênteses for verdadeira. Se a condição for falsa, o bloco é simplesmente ignorado e a execução continua na linha seguinte ao \texttt{if}.
+
+\subsection{\texttt{if-else}}
+
+Quando queremos executar um bloco alternativo caso a condição seja falsa, usamos \texttt{else}:
+
+\begin{lstlisting}
+int idade = 15;
+
+if (idade >= 18) {
+    printf("Maior de idade\n");
+} else {
+    printf("Menor de idade\n");
+}
+\end{lstlisting}
+
+\subsection{Encadeando condições com \texttt{else if}}
+
+Quando existem múltiplas condições mutuamente exclusivas, podemos encadeá-las:
+
+\begin{lstlisting}
+int nota = 7;
+
+if (nota >= 9) {
+    printf("Conceito A\n");
+} else if (nota >= 7) {
+    printf("Conceito B\n");
+} else if (nota >= 5) {
+    printf("Conceito C\n");
+} else {
+    printf("Reprovado\n");
+}
+\end{lstlisting}
+
+É importante notar que as condições são avaliadas \textbf{em ordem}, de cima para baixo, e a execução para no primeiro bloco cuja condição for verdadeira. Trocar a ordem das comparações acima (por exemplo, testar \texttt{nota >= 5} antes de \texttt{nota >= 7}) mudaria completamente o comportamento do programa.
+
+\begin{errocomum}
+Confundir o operador de atribuição (\texttt{=}) com o operador de igualdade (\texttt{==}) dentro de uma condição:
+\begin{lstlisting}
+int senha = 1234;
+
+if (senha = 0) {   // errado: atribui 0 a senha, e a condicao vira falsa
+    printf("Acesso negado\n");
+}
+
+if (senha == 0) {  // correto: compara senha com 0
+    printf("Acesso negado\n");
+}
+\end{lstlisting}
+O trecho \texttt{senha = 0} não é uma comparação — é uma atribuição, que \textbf{sobrescreve} o valor de \texttt{senha} e ainda avalia como falso (porque o valor atribuído foi \texttt{0}). Esse é um dos erros mais traiçoeiros em C, porque o compilador geralmente não o considera um erro de sintaxe, apenas um possível aviso (\textit{warning}). \textbf{Sempre revise suas condições com atenção redobrada.}
+\end{errocomum}
+
+\subsection{Aninhamento e chaves opcionais}
+
+Blocos de \texttt{if} podem conter outros \texttt{if} dentro deles, formando condicionais aninhadas:
+
+\begin{lstlisting}
+if (idade >= 18) {
+    if (possui_documento) {
+        printf("Acesso liberado\n");
+    } else {
+        printf("Apresente um documento\n");
+    }
+} else {
+    printf("Acesso negado: menor de idade\n");
+}
+\end{lstlisting}
+
+Quando o bloco do \texttt{if} (ou do \texttt{else}) contém apenas uma única instrução, as chaves são tecnicamente opcionais:
+
+\begin{lstlisting}
+if (idade >= 18)
+    printf("Maior de idade\n");
+\end{lstlisting}
+
+Embora válido, \textbf{recomendamos fortemente sempre usar chaves}, mesmo em blocos de uma linha só. Isso evita um erro clássico: se alguém adicionar uma segunda linha ao bloco no futuro, sem perceber que faltam chaves, apenas a primeira linha continuará condicionada ao \texttt{if} — as demais serão executadas incondicionalmente, o que pode gerar bugs difíceis de detectar.
+
+\subsection{O operador ternário}
+
+Para condições simples que resultam na atribuição de um valor, C oferece uma forma compacta: o \textbf{operador ternário} \texttt{?:}
+
+\begin{lstlisting}
+int idade = 20;
+char *status = (idade >= 18) ? "maior" : "menor";
+\end{lstlisting}
+
+A expressão \texttt{condicao ? valor\_se\_verdadeiro : valor\_se\_falso} é equivalente a um \texttt{if-else} que atribui um valor a uma variável, mas escrita em uma única linha. É útil para casos simples, mas deve ser evitada quando a lógica se torna muito complexa — nesse caso, um \texttt{if-else} tradicional costuma ser mais legível.
+
+\subsection{A estrutura \texttt{switch}}
+
+Quando uma mesma variável precisa ser comparada com vários valores possíveis, o \texttt{switch} pode ser uma alternativa mais organizada do que uma longa cadeia de \texttt{else if}:
+
+\begin{lstlisting}
+int dia = 3;
+
+switch (dia) {
+    case 1:
+        printf("Domingo\n");
+        break;
+    case 2:
+        printf("Segunda-feira\n");
+        break;
+    case 3:
+        printf("Terca-feira\n");
+        break;
+    default:
+        printf("Dia invalido\n");
+}
+\end{lstlisting}
+
+O \texttt{switch} compara o valor da expressão (\texttt{dia}) com cada \texttt{case}, executando o bloco correspondente. O \texttt{default} é executado quando nenhum \texttt{case} corresponde ao valor — de forma semelhante a um \texttt{else} final.
+
+\begin{errocomum}
+Esquecer o \texttt{break} ao final de cada \texttt{case}:
+\begin{lstlisting}
+switch (dia) {
+    case 1:
+        printf("Domingo\n");
+    case 2:
+        printf("Segunda-feira\n"); // sera executado mesmo se dia == 1!
+        break;
+}
+\end{lstlisting}
+Sem o \texttt{break}, a execução de um \texttt{switch} \textbf{continua} para o próximo \texttt{case}, executando-o também, independentemente da condição — um comportamento chamado de \textit{fall-through}. Às vezes esse comportamento é usado intencionalmente, mas na grande maioria dos casos ele é um erro de digitação com consequências sérias. Revise sempre se cada \texttt{case} termina com \texttt{break} (ou \texttt{return}, quando dentro de uma função).
+\end{errocomum}
+
+O \texttt{switch} em C só funciona com valores de tipos inteiros (incluindo \texttt{char}) e não aceita, por exemplo, comparações com \texttt{strings} ou intervalos de valores — limitações importantes a se ter em mente ao decidir entre um \texttt{switch} e uma cadeia de \texttt{if-else}.
 
 \section{Laços}
 
+Laços (também chamados de \textit{loops}) permitem repetir um bloco de instruções enquanto uma condição for satisfeita, evitando que precisemos repetir manualmente o mesmo código várias vezes.
+
+\subsection{O laço \texttt{while}}
+
+O \texttt{while} repete um bloco de código \textbf{enquanto} sua condição for verdadeira. A condição é testada \textbf{antes} de cada repetição:
+
+\begin{lstlisting}
+int contador = 1;
+
+while (contador <= 5) {
+    printf("%d\n", contador);
+    contador++;
+}
+\end{lstlisting}
+
+Se a condição for falsa já na primeira verificação, o bloco do \texttt{while} nunca é executado.
+
+\subsection{O laço \texttt{do-while}}
+
+O \texttt{do-while} é semelhante ao \texttt{while}, mas testa a condição \textbf{depois} de executar o bloco — o que garante que o bloco seja executado pelo menos uma vez:
+
+\begin{lstlisting}
+int opcao;
+
+do {
+    printf("Digite 0 para sair: ");
+    scanf("%d", &opcao);
+} while (opcao != 0);
+\end{lstlisting}
+
+Essa estrutura é particularmente útil em situações como menus interativos, em que queremos executar a ação (exibir o menu) antes mesmo de sabermos se o usuário quer continuar ou não.
+
+\subsection{O laço \texttt{for}}
+
+O \texttt{for} é a estrutura de repetição mais utilizada quando sabemos, de antemão, quantas vezes (ou sob que condição controlada) o laço deve se repetir. Ele reúne três partes em uma única linha: inicialização, condição e incremento (ou decremento).
+
+\begin{lstlisting}
+for (int i = 1; i <= 5; i++) {
+    printf("%d\n", i);
+}
+\end{lstlisting}
+
+As três partes do \texttt{for} são executadas na seguinte ordem lógica:
+
+\begin{enumerate}
+    \item A \textbf{inicialização} (\texttt{int i = 1}) é executada uma única vez, no início.
+    \item A \textbf{condição} (\texttt{i <= 5}) é testada antes de cada repetição. Se for falsa, o laço termina.
+    \item O bloco de código é executado.
+    \item O \textbf{incremento} (\texttt{i++}) é executado ao final de cada repetição, e o processo volta ao passo 2.
+\end{enumerate}
+
+O \texttt{for} e o \texttt{while} são, no fundo, formas equivalentes de expressar a mesma ideia — o exemplo acima poderia ser reescrito com um \texttt{while}:
+
+\begin{lstlisting}
+int i = 1;
+while (i <= 5) {
+    printf("%d\n", i);
+    i++;
+}
+\end{lstlisting}
+
+Na prática, usamos \texttt{for} quando o número de repetições (ou o critério de parada) é conhecido de antemão, e \texttt{while} quando a repetição depende de uma condição que só se revela durante a execução do programa (como esperar por uma entrada específica do usuário).
+
+\begin{errocomum}
+Criar um laço infinito por esquecer de atualizar a variável de controle:
+\begin{lstlisting}
+int i = 1;
+while (i <= 5) {
+    printf("%d\n", i);
+    // faltou i++; o laco nunca termina!
+}
+\end{lstlisting}
+Todo laço controlado por condição precisa de algo que, eventualmente, torne essa condição falsa. Antes de compilar um laço \texttt{while} ou \texttt{do-while}, pergunte-se sempre: \textbf{"o que, dentro deste bloco, está caminhando para tornar a condição falsa?"} Se a resposta for "nada", você encontrou um laço infinito antes mesmo de executá-lo.
+\end{errocomum}
+
+\subsection{\texttt{break} e \texttt{continue}}
+
+Duas palavras-chave permitem alterar o comportamento padrão de um laço:
+
+\begin{itemize}
+    \item \texttt{break} interrompe o laço imediatamente, saindo dele por completo.
+    \item \texttt{continue} interrompe apenas a repetição atual, pulando direto para a próxima verificação da condição.
+\end{itemize}
+
+\begin{lstlisting}
+for (int i = 1; i <= 10; i++) {
+    if (i == 5) {
+        break; // encerra o laco quando i for 5
+    }
+    printf("%d\n", i);
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+for (int i = 1; i <= 10; i++) {
+    if (i % 2 == 0) {
+        continue; // pula os numeros pares
+    }
+    printf("%d\n", i);
+}
+\end{lstlisting}
+
+\subsection{Laços aninhados}
+
+Assim como as condicionais, laços também podem ser aninhados — um laço dentro de outro. Isso é especialmente útil para percorrer estruturas bidimensionais, como veremos mais adiante ao estudarmos matrizes:
+
+\begin{lstlisting}
+for (int i = 1; i <= 3; i++) {
+    for (int j = 1; j <= 3; j++) {
+        printf("(%d, %d) ", i, j);
+    }
+    printf("\n");
+}
+\end{lstlisting}
+
+Note que, a cada repetição do laço externo (controlado por \texttt{i}), o laço interno (controlado por \texttt{j}) é executado \textbf{por completo} antes que o laço externo avance para a próxima repetição. Entender essa ordem de execução é fundamental para trabalhar corretamente com laços aninhados.
+
+\section*{Resumo do Capítulo}
+Neste capítulo, aprendemos a alterar o fluxo sequencial padrão de um programa em C. Vimos como tomar decisões com \texttt{if}, \texttt{else if}, \texttt{else} e \texttt{switch}, e como repetir blocos de código com \texttt{while}, \texttt{do-while} e \texttt{for}. Também vimos como controlar o comportamento de um laço com \texttt{break} e \texttt{continue}, e discutimos armadilhas comuns, como confundir \texttt{=} com \texttt{==} e esquecer de atualizar a condição de um laço. Essas estruturas são a espinha dorsal de praticamente todo programa não trivial, e vamos utilizá-las constantemente dos próximos capítulos em diante.
+
+\begin{tcolorbox}[title={Ao final deste capítulo, você deve ser capaz de:}]
+\begin{itemize}
+    \item Utilizar \texttt{if}, \texttt{else if} e \texttt{else} para tomar decisões.
+    \item Utilizar o operador ternário em condições simples.
+    \item Utilizar \texttt{switch} para comparar uma variável com múltiplos valores possíveis.
+    \item Diferenciar \texttt{while}, \texttt{do-while} e \texttt{for}, e escolher a estrutura mais adequada a cada situação.
+    \item Utilizar \texttt{break} e \texttt{continue} para controlar a execução de um laço.
+    \item Identificar e evitar laços infinitos.
+    \item Trabalhar com condicionais e laços aninhados.
+\end{itemize}
+\end{tcolorbox}
+
+\section*{Exercícios}
+
+\subsection*{Exercício 1 --- Fixação}
+Escreva um programa que leia um número inteiro digitado pelo usuário e informe, usando \texttt{if-else}, se ele é positivo, negativo ou igual a zero.
+
+\subsection*{Exercício 2 --- Aplicação}
+Escreva um programa que utilize um laço \texttt{for} para exibir todos os números de 1 a 100 que sejam múltiplos de 3 \textbf{ou} de 5. Em seguida, utilizando um segundo laço, calcule e exiba a soma de todos esses números.
+
+\subsection*{Exercício 3 --- Desafio}
+Escreva um programa que simule um menu simples utilizando \texttt{do-while} e \texttt{switch}. O menu deve oferecer três opções (por exemplo, "1. Somar dois números", "2. Verificar se um número é par ou ímpar", "0. Sair") e continuar sendo exibido até que o usuário escolha a opção de sair.
+
+Depois de implementar o programa, reflita: por que o \texttt{do-while} é mais adequado do que um \texttt{while} comum nesse cenário? O que mudaria no comportamento do programa se você tivesse usado um \texttt{while} no lugar?
 %----------------------------------------
 
 \chapter{Funções}
