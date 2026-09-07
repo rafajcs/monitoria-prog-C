@@ -3,7 +3,7 @@ layout: default
 title: 1. Introdução
 ---
 
-[🏠 Início](../README.md) | [Próximo: Variáveis, Tipos e Operadores ➡️](02-variaveis-tipos-operadores.md)
+[🏠 Início](../README.md) | [Próximo ➡️](02-variaveis-tipos-operadores.md)
 
 ---
 

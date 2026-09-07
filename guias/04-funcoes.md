@@ -3,7 +3,7 @@ layout: default
 title: 4. Funções
 ---
 
-[🏠 Início](../README.md) | [⬅️ Anterior: Controle de Fluxo](03-controle-de-fluxo.md)
+[🏠 Início](../README.md) | [⬅️ Anterior](03-controle-de-fluxo.md) | [Próximo ➡️](05-vetores.md)
 
 ---
 

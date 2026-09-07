@@ -3,7 +3,7 @@ layout: default
 title: 3. Controle de Fluxo
 ---
 
-[🏠 Início](../README.md) | [⬅️ Anterior: Variáveis, Tipos e Operadores](02-variaveis-tipos-operadores.md) | [Próximo: Funções ➡️](04-funcoes.md)
+[🏠 Início](../README.md) | [⬅️ Anterior](02-variaveis-tipos-operadores.md) | [Próximo ➡️](04-funcoes.md)
 
 ---
 
