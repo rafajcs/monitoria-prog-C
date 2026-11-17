@@ -1,0 +1,253 @@
+\chapter{Vetores}
+
+Até agora, cada variável que declaramos guardava exatamente um valor: uma idade, uma nota, um resultado de soma. Mas a maioria dos problemas reais envolve \textbf{coleções} de dados relacionados: as notas de uma turma inteira, os nomes de uma lista de convidados, as temperaturas registradas ao longo de uma semana. Guardar cada um desses valores em uma variável separada (\texttt{nota1}, \texttt{nota2}, \texttt{nota3}, \ldots) rapidamente se torna inviável — e, pior, impede que você processe esses dados com um laço, já que não existe como "percorrer" um conjunto de variáveis independentes.
+
+Neste capítulo, damos o primeiro passo da Parte II da apostila, dedicada à \textbf{organização de dados}: vamos aprender a usar \textbf{vetores}, a estrutura mais fundamental de C para armazenar múltiplos valores do mesmo tipo sob um único nome.
+
+\section{Conceito de Vetor}
+
+Um \textbf{vetor} é uma sequência de elementos do mesmo tipo, armazenados de forma \textbf{contígua} na memória — ou seja, um logo em seguida do outro, sem espaços entre eles. Cada elemento é acessado por meio de um \textbf{índice}, que indica sua posição dentro do vetor.
+
+\begin{center}
+\texttt{
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+notas[0] & notas[1] & notas[2] & notas[3] & notas[4] \\
+\hline
+7 & 8 & 5 & 9 & 6 \\
+\hline
+\end{tabular}
+}
+\end{center}
+
+Um detalhe fundamental, que costuma confundir quem vem de fora da programação: em C, os índices de um vetor \textbf{começam em \texttt{0}}, e não em \texttt{1} (\textit{zero-based numbering}). Existem algumas razões interessantes para a adoção dessa regra, vale a pena conferir. Por isso, um vetor com 5 elementos possui índices válidos de \texttt{0} a \texttt{4} — não existe um \texttt{notas[5]}.
+
+Como os elementos ficam lado a lado na memória, conhecer o endereço do primeiro elemento e o tamanho de cada elemento (determinado pelo seu tipo) é suficiente para calcular o endereço de qualquer outro elemento do vetor. Essa propriedade é o que torna o acesso a um vetor extremamente rápido, e é também a base da relação entre vetores e ponteiros, que exploraremos na Seção~\ref{sec:vetores-ponteiros}.
+
+\section{Declaração e Inicialização}
+
+Para declarar um vetor, informamos o tipo dos elementos, um nome e, entre colchetes, quantos elementos ele deve conter:
+
+\begin{lstlisting}
+int notas[5];
+\end{lstlisting}
+
+Isso reserva espaço para 5 números inteiros consecutivos, todos ainda não inicializados (contendo "lixo de memória", exatamente como discutimos para variáveis simples no Capítulo 2).
+
+Também é possível inicializar um vetor no momento da declaração, informando seus valores entre chaves:
+
+\begin{lstlisting}
+int valores[] = {10, 20, 30, 40};
+\end{lstlisting}
+
+Nesse caso, o tamanho do vetor é \textbf{implícito}: o compilador conta os valores fornecidos e reserva exatamente o espaço necessário — aqui, 4 posições.
+
+Também é possível combinar tamanho explícito com uma lista de inicialização menor que o tamanho total, o que chamamos de \textbf{inicialização parcial}:
+
+\begin{lstlisting}
+int valores[5] = {10, 20}; // valores[2], valores[3] e valores[4] viram 0
+\end{lstlisting}
+
+Quando isso acontece, todas as posições não explicitamente inicializadas são automaticamente preenchidas com \texttt{0} — um dos poucos casos em C em que uma variável recebe um valor inicial "de graça".
+
+\section{Acesso aos Elementos}
+
+Acessamos (para leitura ou alteração) um elemento específico de um vetor usando o operador de índice \texttt{[]}:
+
+\begin{lstlisting}
+int notas[5] = {7, 8, 5, 9, 6};
+
+printf("%d\n", notas[0]); // le o primeiro elemento: 7
+notas[2] = 10;             // altera o terceiro elemento
+\end{lstlisting}
+
+C \textbf{não verifica automaticamente} se um índice está dentro dos limites válidos do vetor. Acessar uma posição inexistente não gera um erro de compilação nem, necessariamente, um erro perceptível durante a execução — o programa pode simplesmente ler ou escrever em uma região de memória que não pertence ao vetor, com consequências imprevisíveis: desde um valor sem sentido até a corrupção de outras variáveis ou o encerramento abrupto do programa.
+
+\begin{errocomum}
+Acessar a posição igual ao tamanho do vetor, por acreditar (erroneamente) que os índices vão de \texttt{1} até o tamanho:
+\begin{lstlisting}
+int notas[5] = {7, 8, 5, 9, 6};
+
+printf("%d\n", notas[5]); // fora dos limites! indices validos: 0 a 4
+\end{lstlisting}
+Um vetor de tamanho \texttt{n} sempre tem índices válidos de \texttt{0} a \texttt{n - 1}. Essa é provavelmente a fonte de erro mais comum entre quem está começando a trabalhar com vetores em C — e, diferente de linguagens como Python, o programa não interrompe a execução com uma mensagem clara de erro: o comportamento é apenas \textit{indefinido}.
+\end{errocomum}
+
+\section{Percorrendo Vetores}
+
+Como os elementos de um vetor têm índices sequenciais, um laço \texttt{for} é a ferramenta natural para acessar todos eles, um de cada vez:
+
+\begin{lstlisting}
+int notas[5] = {7, 8, 5, 9, 6};
+
+for (int i = 0; i < 5; i++) {
+    printf("%d\n", notas[i]);
+}
+\end{lstlisting}
+
+Note a condição do laço: \texttt{i < 5}, e não \texttt{i <= 5} — garantindo que o último índice acessado seja \texttt{4}, o último válido.
+
+Esse padrão — percorrer um vetor com um laço — é a base para praticamente todas as operações que faremos daqui em diante, como somar todos os elementos usando um \textbf{acumulador}:
+
+\begin{lstlisting}
+int soma = 0;
+for (int i = 0; i < 5; i++) {
+    soma += notas[i];
+}
+\end{lstlisting}
+
+ou contar quantos elementos satisfazem uma condição, usando um \textbf{contador}:
+
+\begin{lstlisting}
+int aprovados = 0;
+for (int i = 0; i < 5; i++) {
+    if (notas[i] >= 6) {
+        aprovados++;
+    }
+}
+\end{lstlisting}
+
+\section{Vetores e Funções}
+\label{sec:vetores-funcoes}
+
+Assim como variáveis, vetores podem ser passados como argumentos para funções. A sintaxe do parâmetro, no entanto, é um pouco diferente:
+
+\begin{lstlisting}
+void exibir(int vetor[], int tamanho) {
+    for (int i = 0; i < tamanho; i++) {
+        printf("%d\n", vetor[i]);
+    }
+}
+\end{lstlisting}
+
+Um detalhe crucial: \textbf{o tamanho do vetor não "viaja" junto com ele} quando passado para uma função. Diferente do que acontece dentro do próprio arquivo, onde o compilador sabe que \texttt{notas} tem 5 elementos porque viu sua declaração, uma função que recebe um vetor como parâmetro só enxerga o endereço do seu primeiro elemento — ela não tem como saber, sozinha, onde ele termina. Por isso, é uma convenção quase universal em C passar o tamanho do vetor como um \textbf{segundo parâmetro}, como fizemos acima com \texttt{tamanho}.
+
+Outro ponto importante: diferente da passagem por valor que estudamos no Capítulo 4, \textbf{alterações feitas nos elementos de um vetor dentro de uma função afetam o vetor original}, fora dela:
+
+\begin{lstlisting}
+void zerar_vetor(int vetor[], int tamanho) {
+    for (int i = 0; i < tamanho; i++) {
+        vetor[i] = 0;
+    }
+}
+
+int main(void) {
+    int valores[3] = {1, 2, 3};
+    zerar_vetor(valores, 3);
+    printf("%d\n", valores[0]); // exibe 0!
+    return 0;
+}
+\end{lstlisting}
+
+Isso pode parecer contraditório com o que aprendemos sobre passagem por valor — e é exatamente essa aparente contradição que vamos explicar na próxima seção.
+
+\section{Vetores e Ponteiros}
+\label{sec:vetores-ponteiros}
+
+Chegamos a uma das conexões mais importantes da linguagem C. O nome de um vetor, usado sozinho em uma expressão, é tratado pelo compilador como o \textbf{endereço do seu primeiro elemento}. Ou seja, as duas expressões abaixo são equivalentes:
+
+\begin{lstlisting}
+notas          // endereco do primeiro elemento
+&notas[0]      // endereco do primeiro elemento, explicitamente
+\end{lstlisting}
+
+É exatamente por isso que, ao passar um vetor para uma função, você está — na prática — passando apenas um \textbf{endereço de memória}, e não uma cópia de todos os elementos. É esse mecanismo que explica o comportamento observado na Seção~\ref{sec:vetores-funcoes}: a função recebe o endereço de onde o vetor \textit{de verdade} está armazenado, e por isso qualquer alteração feita através desse endereço afeta o vetor original.
+
+C também permite acessar os elementos de um vetor usando \textbf{aritmética de ponteiros}: somar um número ao endereço do vetor avança essa quantidade de \textit{elementos} (não de bytes) dentro dele. Isso significa que a notação familiar \texttt{notas[i]} é, internamente, apenas uma forma mais legível de escrever \texttt{*(notas + i)}:
+
+\begin{lstlisting}
+notas[i]      // forma usual
+*(notas + i)  // forma equivalente, usando aritmetica de ponteiros
+\end{lstlisting}
+
+Não é necessário, neste momento, dominar completamente a manipulação de ponteiros — esse será o tema central da Parte III da apostila. O objetivo aqui é apenas construir a intuição correta: \textbf{um vetor é, fundamentalmente, um endereço de memória associado a um tipo e a um tamanho conhecido em tempo de compilação}. Guarde essa ideia — ela vai reaparecer, com muito mais profundidade, quando estudarmos ponteiros e alocação dinâmica.
+
+\section{Operações Clássicas sobre Vetores}
+
+Grande parte dos problemas envolvendo vetores se resume a variações de um pequeno conjunto de operações. Vale a pena conhecê-las bem, pois elas reaparecem constantemente:
+
+\begin{itemize}
+    \item \textbf{Soma e média}: percorrer o vetor acumulando os valores e, ao final, dividir pela quantidade de elementos.
+    \item \textbf{Maior e menor elemento}: percorrer o vetor guardando, em uma variável auxiliar, o maior (ou menor) valor encontrado até o momento.
+    \item \textbf{Busca}: percorrer o vetor procurando um valor específico, geralmente interrompendo o laço com \texttt{break} assim que ele é encontrado.
+    \item \textbf{Contagem de ocorrências}: percorrer o vetor contando quantas vezes um valor (ou uma condição) aparece.
+    \item \textbf{Inversão}: trocar os elementos das extremidades para o centro, geralmente usando dois índices que se aproximam.
+    \item \textbf{Cópia}: percorrer um vetor de origem, copiando cada elemento para as posições correspondentes de um vetor de destino.
+\end{itemize}
+
+Todas essas operações compartilham a mesma estrutura básica: um laço \texttt{for} que vai de \texttt{0} até \texttt{tamanho - 1}, com alguma lógica de acumulação, comparação ou cópia dentro dele. Dominar esse padrão é mais valioso do que decorar cada operação isoladamente.
+
+\begin{errocomum}
+Usar um vetor sem garantir que todas as posições relevantes foram inicializadas antes de lê-las:
+\begin{lstlisting}
+int valores[5]; // nenhum elemento inicializado
+
+int soma = 0;
+for (int i = 0; i < 5; i++) {
+    soma += valores[i]; // soma "lixo de memoria"
+}
+\end{lstlisting}
+Assim como uma variável simples, um vetor declarado localmente (dentro de uma função) \textbf{não} começa automaticamente zerado. Se o seu algoritmo depende de valores conhecidos antes de processá-los, garanta explicitamente que o vetor foi preenchido (seja por inicialização direta, seja por leitura via \texttt{scanf}) antes de usá-lo em cálculos.
+\end{errocomum}
+
+\section{Erros Comuns}
+
+Reunimos aqui, de forma resumida, as armadilhas mais frequentes ao trabalhar com vetores em C:
+
+\begin{itemize}
+    \item Assumir que os índices começam em \texttt{1}, em vez de \texttt{0}.
+    \item Acessar \texttt{vetor[tamanho]}, uma posição sempre inválida (o último índice válido é \texttt{tamanho - 1}).
+    \item Confundir o \textbf{tamanho} do vetor com o \textbf{último índice} válido.
+    \item Esquecer de passar o tamanho do vetor como parâmetro ao usá-lo em uma função.
+    \item Processar um vetor cujas posições ainda não foram inicializadas.
+\end{itemize}
+
+\section*{Resumo do Capítulo}
+Neste capítulo, demos o primeiro passo da Parte II ao aprender a trabalhar com coleções de dados por meio de vetores. Vimos como declarar, inicializar, acessar e percorrer vetores, como passá-los para funções — e por que, diferente de variáveis comuns, alterações feitas dentro da função afetam o vetor original. Também introduzimos, de forma intuitiva, a relação entre vetores e endereços de memória, uma ideia que será retomada com profundidade na Parte III. No próximo capítulo, vamos aplicar tudo isso a um caso particular extremamente importante: vetores de caracteres, usados para representar texto.
+
+\begin{objetivos}
+\begin{itemize}
+    \item Explicar o que é um vetor e por que seus índices começam em \texttt{0}.
+    \item Declarar e inicializar vetores, total ou parcialmente.
+    \item Acessar e alterar elementos de um vetor com segurança.
+    \item Percorrer um vetor com \texttt{for}, implementando acumuladores e contadores.
+    \item Passar vetores para funções, incluindo seu tamanho como parâmetro.
+    \item Explicar por que alterações em um vetor dentro de uma função afetam o vetor original.
+    \item Implementar as operações clássicas sobre vetores: soma, média, busca, maior/menor elemento, contagem, inversão e cópia.
+\end{itemize}
+\end{objetivos}
+
+\section*{Exercícios}
+
+\begin{exercicio}
+
+\subsection*{Exercício 1 --- Fixação}
+Declare um vetor de 10 inteiros, preencha-o lendo valores digitados pelo usuário e exiba, em seguida, todos os elementos em ordem inversa (do último para o primeiro).
+
+\subsection*{Exercício 2 --- Aplicação}
+Escreva um programa que leia a quantidade de alunos de uma turma, limitada a 50, e armazene suas notas em um vetor. Ao final, exiba a média da turma, a maior nota e a menor nota.
+
+\subsection*{Exercício 3 --- Aplicação}
+Escreva uma função \texttt{int buscar(int vetor[], int tamanho, int valor)} que devolva o índice da primeira ocorrência de \texttt{valor} dentro do vetor, ou \texttt{-1} caso ele não seja encontrado. Utilize essa função em um pequeno programa de teste.
+
+\subsection*{Exercício 4 --- Integrador}
+Escreva um programa que leia um vetor de números inteiros e, utilizando funções separadas para cada tarefa, seja capaz de:
+
+\begin{enumerate}
+\item remover as duplicatas, criando um novo vetor contendo apenas valores únicos;
+\item ordenar o novo vetor em ordem crescente, utilizando o algoritmo de ordenação por seleção ou por bolha;
+\item exibir o resultado final.
+\end{enumerate}
+
+\subsection*{Exercício 5 --- Desafio}
+Sem utilizar uma função de biblioteca pronta, implemente uma função
+
+\begin{center}
+\texttt{void inverter(int vetor[], int tamanho)}
+\end{center}
+
+que inverta a ordem dos elementos de um vetor \textbf{no próprio vetor}, ou seja, sem criar um vetor auxiliar.
+
+\textbf{Dica:} utilize dois índices: um começando no início do vetor e outro no final. A cada repetição, troque os elementos apontados pelos índices e faça-os se aproximarem até que se encontrem.
+
+\end{exercicio}

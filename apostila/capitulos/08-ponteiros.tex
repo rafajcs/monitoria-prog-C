@@ -1,0 +1,429 @@
+\chapter{Ponteiros}
+
+Ao longo da apostila, deixamos algumas perguntas em aberto de propósito. No Capítulo 2, perguntamos por que o \texttt{scanf} exige o operador \texttt{\&} antes do nome da variável. No Capítulo 4, vimos uma função \texttt{trocar} que, por mais correta que parecesse, simplesmente não conseguia trocar os valores de duas variáveis de \texttt{main}. No Capítulo 5, descobrimos que o nome de um vetor se comporta como o endereço do seu primeiro elemento, e que, por isso, funções conseguem alterar vetores recebidos como parâmetro.
+
+Todas essas perguntas têm a mesma resposta: \textbf{ponteiros}. Neste capítulo, vamos finalmente entender o que está por trás de cada uma dessas situações — e, ao fazê-lo, dar o primeiro passo da Parte III, dedicada ao gerenciamento de memória.
+
+\section{O que é um Ponteiro?}
+
+Vamos começar pelo problema, e não pela sintaxe. Desde o Capítulo 2, sabemos que toda variável ocupa uma posição na memória do computador. Cada uma dessas posições possui um \textbf{endereço}: um número que identifica, de forma única, onde aquele dado está armazenado.
+
+Até agora, sempre trabalhamos com o \textbf{valor} das variáveis: lemos o valor, alteramos o valor, passamos o valor para funções. Mas existem situações em que precisamos trabalhar com o \textbf{endereço} de um dado, e não apenas com seu conteúdo — por exemplo, quando queremos que uma função altere uma variável que pertence a outra função.
+
+Um \textbf{ponteiro} é, simplesmente, uma variável capaz de armazenar um endereço de memória.
+
+\begin{lstlisting}
+int x = 10;
+int *p = &x;
+\end{lstlisting}
+
+Nesse trecho, \texttt{x} é uma variável comum, que guarda o valor \texttt{10}. Já \texttt{p} é um ponteiro, que guarda o \textbf{endereço} de \texttt{x}. Podemos visualizar essa relação assim:
+
+\begin{center}
+\texttt{
+\begin{tabular}{cc}
+\begin{tabular}{|c|}
+\hline
+10 \\
+\hline
+\end{tabular}
+&
+\begin{tabular}{|c|}
+\hline
+0x100 \\
+\hline
+\end{tabular}
+\\[2pt]
+\textit{x} (endereço 0x100) & \textit{p} (guarda 0x100)
+\end{tabular}
+}
+\end{center}
+
+Os endereços exibidos aqui (como \texttt{0x100}) são ilustrativos: em um programa real, o valor exato depende do sistema operacional e da execução, e muda de uma vez para outra.
+
+\section{Endereço e Operador \texttt{\&}}
+
+Antes de falarmos do ponteiro em si, vale a pena separar o conceito de \textbf{endereço}. Em C, o operador \texttt{\&}, aplicado a uma variável, devolve o endereço onde ela está armazenada:
+
+\begin{lstlisting}
+int x = 10;
+
+printf("%d\n", x);            // exibe o valor de x: 10
+printf("%p\n", (void *)&x);   // exibe o endereco de x
+\end{lstlisting}
+
+O especificador \texttt{\%p} é usado para exibir endereços de memória (geralmente em hexadecimal), e o \textit{cast} para \texttt{(void *)} é a forma recomendada de passar um endereço para \texttt{printf} com esse especificador.
+
+Repare na diferença entre as duas linhas: \texttt{x} é o \textbf{valor} guardado na variável, e \texttt{\&x} é o \textbf{lugar} onde essa variável vive. Essa distinção — valor versus endereço — é a base de tudo o que vem a seguir.
+
+Isso nos permite, enfim, responder à pergunta que deixamos em aberto no Capítulo 2: por que \texttt{scanf("\%d", \&idade)} precisa do \texttt{\&}? Porque o \texttt{scanf} precisa saber \textbf{onde} escrever o valor lido. Se passássemos apenas \texttt{idade}, ele receberia uma cópia do valor atual da variável — e não teria nenhuma forma de alterar a variável original. Ao passar \texttt{\&idade}, entregamos a ele o endereço onde o valor deve ser gravado.
+
+\section{Declaração de Ponteiros e Operador \texttt{*}}
+
+Para declarar um ponteiro, colocamos um asterisco entre o tipo e o nome da variável:
+
+\begin{lstlisting}
+int *p;
+\end{lstlisting}
+
+Essa linha deve ser lida como: ``\texttt{p} é um ponteiro para \texttt{int}''. O tipo à esquerda do asterisco indica o \textbf{tipo do dado apontado}. Em seguida, podemos fazer o ponteiro guardar o endereço de uma variável existente:
+
+\begin{lstlisting}
+int x = 10;
+int *p;
+
+p = &x;
+\end{lstlisting}
+
+Agora, o mesmo símbolo \texttt{*} aparece com um segundo significado quando usado em uma \textbf{expressão}, e não em uma declaração:
+
+\begin{lstlisting}
+int *p;   // declaracao: p e um ponteiro para int
+
+*p = 20;  // expressao: acessa o valor apontado por p
+\end{lstlisting}
+
+\begin{errocomum}
+Esquecer que o asterisco \texttt{*} tem dois papéis diferentes em C, dependendo de onde aparece:
+\begin{lstlisting}
+int *p = &x;  // aqui, * faz parte do TIPO: p e um ponteiro para int
+*p = 20;      // aqui, * e o operador de desreferenciacao: acessa o valor apontado
+\end{lstlisting}
+Na declaração, o \texttt{*} participa da definição do \textbf{tipo} do ponteiro. Em uma expressão, ele realiza a \textbf{desreferenciação}: acessa o valor que está no endereço guardado. Misturar esses dois papéis é uma das maiores fontes de confusão para quem está aprendendo ponteiros — vale reler uma linha com \texttt{*} perguntando-se sempre: ``isto é uma declaração, ou uma expressão?''
+\end{errocomum}
+
+\section{Ponteiros e Acesso Indireto}
+
+Com um ponteiro guardando o endereço de uma variável, podemos agora acessar essa variável \textbf{indiretamente}, sem nunca mencionar seu nome:
+
+\begin{lstlisting}
+int x = 10;
+int *p = &x;
+
+printf("%d\n", x);   // 10
+printf("%d\n", *p);  // 10: acessando x atraves de p
+\end{lstlisting}
+
+Mais importante: podemos também \textbf{modificar} a variável original através do ponteiro:
+
+\begin{lstlisting}
+*p = 50;
+
+printf("%d\n", x);   // agora x vale 50
+\end{lstlisting}
+
+Visualmente, o que acontece é:
+
+\begin{center}
+\texttt{
+\begin{tabular}{ll}
+\textbf{Antes:} & x = 10 \quad p $\longrightarrow$ x \\
+\textbf{Depois de *p = 50:} & x = 50 \quad p $\longrightarrow$ x \\
+\end{tabular}
+}
+\end{center}
+
+O ponteiro \texttt{p} continua apontando para o mesmo lugar; o que mudou foi o \textbf{conteúdo} desse lugar. A ideia central desta seção pode ser resumida assim:
+
+\begin{quote}
+\textit{O ponteiro permite acessar uma variável indiretamente, por meio de seu endereço.}
+\end{quote}
+
+\section{Ponteiros e Funções}
+
+Chegamos a uma das seções mais importantes do capítulo, porque ela resolve, finalmente, o problema que deixamos aberto no Capítulo 4. Lembre-se da limitação da passagem por valor:
+
+\begin{lstlisting}
+void alterar(int x) {
+    x = 100;
+}
+
+int main(void) {
+    int x = 10;
+    alterar(x);
+    printf("%d\n", x); // continua 10
+    return 0;
+}
+\end{lstlisting}
+
+A função \texttt{alterar} recebe uma \textbf{cópia} de \texttt{x}, e é essa cópia que é modificada. A variável original permanece intacta.
+
+Para que uma função consiga alterar uma variável de fora, ela precisa receber \textbf{o endereço} dessa variável, e não o seu valor:
+
+\begin{lstlisting}
+void alterar(int *x) {
+    *x = 100;
+}
+
+int main(void) {
+    int x = 10;
+    alterar(&x);
+    printf("%d\n", x); // agora x vale 100
+    return 0;
+}
+\end{lstlisting}
+
+Agora o parâmetro \texttt{x} da função é um ponteiro: ele recebe uma cópia do \textbf{endereço} de \texttt{x}, e, usando \texttt{*x}, a função consegue acessar e modificar o objeto original, que vive em \texttt{main}.
+
+Isso nos permite, enfim, escrever a função \texttt{trocar} do Capítulo 4 de forma correta:
+
+\begin{lstlisting}
+void trocar(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// chamada: trocar(&x, &y);
+\end{lstlisting}
+
+Há uma sutileza conceitual importante aqui. Em linguagens como C++, existe um mecanismo chamado ``passagem por referência''. \textbf{C não possui passagem por referência propriamente dita}: a passagem continua sendo, sempre, por valor. O que acontece é que o valor passado é um \textbf{endereço} — a função recebe uma cópia do endereço e, por meio dela, consegue modificar o objeto original. O mecanismo de passagem de argumentos não mudou; mudou apenas o que escolhemos passar.
+
+Isso também explica, de forma definitiva, o comportamento de vetores em funções que observamos no Capítulo 5: quando passamos um vetor, estamos passando o endereço do seu primeiro elemento. É por isso que alterações feitas dentro da função afetam o vetor original.
+
+\section{Ponteiros e Vetores}
+
+Agora podemos tornar explícita a relação entre ponteiros e vetores, que já apareceu de forma intuitiva no Capítulo 5. Considere:
+
+\begin{lstlisting}
+int v[5] = {10, 20, 30, 40, 50};
+
+int *p = v;
+\end{lstlisting}
+
+Como o nome de um vetor é tratado como o endereço do seu primeiro elemento, \texttt{p} passa a apontar para \texttt{v[0]}:
+
+\begin{center}
+\texttt{
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+10 & 20 & 30 & 40 & 50 \\
+\hline
+\end{tabular}
+}
+\\[2pt]
+\texttt{p} aponta para o primeiro elemento (\texttt{v[0]})
+\end{center}
+
+A partir daí, podemos acessar os elementos do vetor através do ponteiro:
+
+\begin{lstlisting}
+*p        // 10 (primeiro elemento)
+*(p + 1)  // 20 (segundo elemento)
+*(p + 2)  // 30 (terceiro elemento)
+\end{lstlisting}
+
+Aqui aparece, pela primeira vez, a ideia de \textbf{aritmética de ponteiros}: somar um número a um ponteiro faz com que ele ``ande'' pela memória. Vamos formalizar essa ideia na próxima seção.
+
+\section{Aritmética de Ponteiros}
+
+Ponteiros aceitam um conjunto restrito de operações aritméticas:
+
+\begin{lstlisting}
+p + 1
+p - 1
+p++
+p--
+\end{lstlisting}
+
+O ponto essencial é entender o que significa, de fato, somar um número a um ponteiro. Considere um ponteiro \texttt{int *p}. A expressão \texttt{p + 1} \textbf{não} significa ``o endereço atual mais 1 byte''. Significa avançar \textbf{uma posição do tipo apontado}. Se \texttt{sizeof(int)} for 4, temos:
+
+\begin{center}
+\texttt{
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Expressão} & \textbf{Endereço (exemplo)} \\
+\hline
+p & 0x1000 \\
+p + 1 & 0x1004 \\
+p + 2 & 0x1008 \\
+\hline
+\end{tabular}
+}
+\end{center}
+
+O compilador cuida de multiplicar o deslocamento pelo tamanho do tipo apontado. Por isso, um ponteiro para \texttt{double} avançaria 8 bytes a cada \texttt{+ 1}, e um ponteiro para \texttt{char}, apenas 1.
+
+Essa observação também esclarece a relação entre a notação de vetores e ponteiros. As duas formas abaixo são equivalentes:
+
+\begin{lstlisting}
+v[i]
+*(v + i)
+\end{lstlisting}
+
+Ou seja: o operador de índice \texttt{[]} é, na prática, uma forma mais legível de escrever aritmética de ponteiros seguida de desreferenciação. Esse é um ótimo momento para perceber o quanto a sintaxe de vetores em C está profundamente ligada a ponteiros.
+
+Um cuidado importante: a aritmética de ponteiros só tem comportamento \textbf{bem definido} quando o ponteiro permanece dentro de um mesmo vetor (ou, no máximo, uma posição além do seu final). Somar ou comparar ponteiros que apontam para variáveis não relacionadas — por exemplo, achando que duas variáveis declaradas lado a lado necessariamente ocupam posições vizinhas na memória — não tem garantia nenhuma no padrão da linguagem.
+
+\section{Ponteiros para Diferentes Tipos}
+
+Um ponteiro sempre carrega, junto com o endereço, a informação sobre \textbf{o tipo do dado apontado}. Podemos declarar ponteiros para qualquer tipo que já conhecemos:
+
+\begin{lstlisting}
+char   *pc;
+int    *pi;
+double *pd;
+\end{lstlisting}
+
+O tipo apontado importa por três motivos:
+
+\begin{itemize}
+    \item determina como os bytes no endereço apontado devem ser \textbf{interpretados} (os mesmos bytes podem significar coisas diferentes como \texttt{int} ou como \texttt{float});
+    \item determina o tamanho do \textbf{passo} na aritmética de ponteiros, como vimos na seção anterior;
+    \item determina \textbf{quantos bytes} são lidos ou escritos ao desreferenciar o ponteiro (\texttt{*pc} acessa 1 byte, enquanto \texttt{*pd} acessa 8, em sistemas típicos).
+\end{itemize}
+
+Isso nos devolve à ideia que apresentamos no Capítulo 2: \textit{o tipo determina como os bits devem ser interpretados}. Um ponteiro apenas estende essa ideia para endereços.
+
+\section{Ponteiros Nulos}
+
+Nem todo ponteiro, em todo momento, aponta para algo válido. Para sinalizar explicitamente que um ponteiro \textbf{não aponta para nenhum objeto}, C oferece a constante \texttt{NULL}:
+
+\begin{lstlisting}
+int *p = NULL;
+\end{lstlisting}
+
+Conceitualmente, \texttt{NULL} representa a ausência de um endereço válido. Embora \texttt{NULL} costume ser implementado, na prática, como o valor zero, vale pensar nele como um \textbf{conceito} distinto de ``o número zero'': ele diz que o ponteiro, intencionalmente, não aponta para lugar nenhum.
+
+Desreferenciar um ponteiro nulo é um erro, geralmente resultando no encerramento abrupto do programa. Por isso, é comum verificar o ponteiro antes de usá-lo:
+
+\begin{lstlisting}
+if (p != NULL) {
+    printf("%d\n", *p);
+}
+\end{lstlisting}
+
+Essa disciplina — inicializar ponteiros com \texttt{NULL} quando ainda não há um endereço válido, e verificar antes de desreferenciar — vai se tornar essencial mais adiante (no Capítulo 10), quando começarmos a solicitar memória dinamicamente durante a execução do programa.
+
+\section{Ponteiros e \texttt{const}}
+
+A palavra-chave \texttt{const}, que apresentamos no Capítulo 2, também pode ser combinada com ponteiros, e o resultado depende de \textbf{onde} ela é escrita. Existem dois efeitos possíveis: proteger o \textbf{valor apontado}, ou proteger o \textbf{próprio ponteiro}.
+
+\begin{lstlisting}
+int x = 10;
+
+const int *p = &x;   // ponteiro para const int
+\end{lstlisting}
+
+Aqui, o \texttt{const} protege o \textbf{valor apontado}: não é permitido modificar \texttt{x} através de \texttt{p} (\texttt{*p = 20;} seria um erro de compilação), mas o próprio ponteiro \texttt{p} pode ser redirecionado para apontar para outra variável.
+
+\begin{lstlisting}
+int *const q = &x;   // ponteiro constante para int
+\end{lstlisting}
+
+Aqui, o \texttt{const} protege o \textbf{próprio ponteiro}: \texttt{q} não pode ser redirecionado para outro endereço, mas o valor apontado pode ser modificado normalmente (\texttt{*q = 20;} é válido).
+
+Existe ainda a combinação dos dois efeitos, \texttt{const int *const r = \&x;}, em que nem o ponteiro nem o valor apontado podem ser alterados. Não vamos explorar mais variações aqui: o objetivo é apenas reconhecer que o \texttt{const} pode proteger \textbf{o dado}, \textbf{o ponteiro}, ou \textbf{ambos}. Esse conhecimento já nos dá, inclusive, uma explicação para algo que vimos no Capítulo 6: por que declarar parâmetros de string como \texttt{const char *} sinaliza que a função não vai modificar o texto recebido.
+
+\section{Erros Comuns com Ponteiros}
+
+Ponteiros são uma das fontes mais frequentes de erros em programas C, em parte porque o compilador, na maioria das vezes, não os impede. Estes são os mais comuns:
+
+\begin{errocomum}
+\textbf{Ponteiro não inicializado.} Um ponteiro declarado e nunca atribuído contém ``lixo de memória'', exatamente como qualquer variável local:
+\begin{lstlisting}
+int *p;
+*p = 10;  // erro: p aponta para um lugar desconhecido
+\end{lstlisting}
+Escrever através de um ponteiro cujo endereço é desconhecido pode corromper outras partes da memória do programa, ou encerrá-lo abruptamente.
+\end{errocomum}
+
+\begin{errocomum}
+\textbf{Desreferenciar \texttt{NULL}.}
+\begin{lstlisting}
+int *p = NULL;
+printf("%d", *p);  // erro: p nao aponta para nada valido
+\end{lstlisting}
+Sempre verifique se o ponteiro é válido antes de desreferenciá-lo, especialmente quando ele pode ter sido recebido de outra função.
+\end{errocomum}
+
+\begin{errocomum}
+\textbf{Confundir endereço e valor.}
+\begin{lstlisting}
+int x = 10;
+int *p = x;     // errado: atribui um int a um ponteiro
+int *q = &x;    // correto: atribui o endereco de x
+\end{lstlisting}
+O compilador costuma emitir um aviso nesse caso, mas nem sempre trata como erro. Leve os \textit{warnings} a sério — para isso, vale compilar com as opções \texttt{-Wall -Wextra} no GCC, que ativam avisos extras sobre construções suspeitas.
+\end{errocomum}
+
+\begin{errocomum}
+\textbf{Confundir \texttt{p} e \texttt{*p}.}
+\begin{lstlisting}
+p    // o ENDERECO guardado no ponteiro
+*p   // o VALOR que esta naquele endereco
+\end{lstlisting}
+Essa é a confusão mais fundamental, da qual derivam muitas outras: lembre-se sempre de que \texttt{p} e \texttt{*p} são coisas diferentes, de tipos diferentes.
+\end{errocomum}
+
+\section*{Resumo do Capítulo}
+
+Podemos condensar tudo o que vimos neste capítulo em uma única cadeia de ideias:
+
+\begin{center}
+\textbf{variável $\rightarrow$ valor $\rightarrow$ endereço $\rightarrow$ ponteiro} \\
+\textbf{$\rightarrow$ desreferenciação $\rightarrow$ acesso indireto.}
+\end{center}
+
+Uma variável ocupa um lugar na memória e guarda um valor. Esse lugar tem um endereço. Um ponteiro é uma variável que guarda esse endereço, e a desreferenciação nos permite acessar, a partir dele, o valor original — de forma indireta. Com essa ideia, resolvemos as perguntas que deixamos em aberto nos capítulos anteriores: o \texttt{\&} do \texttt{scanf}, a função \texttt{trocar} que não funcionava e o comportamento diferente de vetores em funções.
+
+Vimos também como declarar ponteiros, aplicar aritmética de ponteiros dentro de vetores, inicializar ponteiros sem destino com \texttt{NULL} e proteger dados ou endereços com \texttt{const}. Até aqui, todos os ponteiros que utilizamos apontam para objetos cuja memória já existia (variáveis locais ou vetores de tamanho fixo). No próximo capítulo, veremos como a memória de um programa em C é organizada em regiões distintas — preparando o terreno para, no Capítulo 10, aprendermos a solicitar e liberar memória dinamicamente durante a execução.
+
+\begin{objetivos}
+\begin{itemize}
+    \item Explicar o que é um ponteiro e como ele se relaciona com endereços de memória.
+    \item Utilizar os operadores \texttt{\&} e \texttt{*} corretamente, distinguindo seus papéis na declaração e na expressão.
+    \item Acessar e modificar uma variável indiretamente por meio de um ponteiro.
+    \item Escrever funções que alteram variáveis de quem as chamou, usando ponteiros como parâmetros.
+    \item Explicar a relação entre vetores e ponteiros, e utilizar aritmética de ponteiros dentro de um vetor.
+    \item Utilizar \texttt{NULL} e verificar ponteiros antes de desreferenciá-los.
+    \item Diferenciar \texttt{const int *p} de \texttt{int *const p}.
+    \item Reconhecer e evitar os erros mais comuns ao trabalhar com ponteiros.
+\end{itemize}
+\end{objetivos}
+
+\section*{Exercícios}
+
+\begin{exercicio}
+
+\subsection*{Exercício 1 --- Fixação}
+Declare uma variável \texttt{int} com um valor de sua escolha e um ponteiro para ela. Utilize \texttt{printf} para exibir o valor da variável, o endereço da variável (com \texttt{\%p}), o valor do ponteiro e o valor apontado pelo ponteiro. O que você observa ao comparar o endereço da variável com o valor do ponteiro?
+
+\subsection*{Exercício 2 --- Aplicação}
+Declare uma variável \texttt{double} e um ponteiro para ela. Modifique o valor da variável \textbf{exclusivamente} através do ponteiro, e confirme, com \texttt{printf}, que a variável original foi alterada.
+
+\subsection*{Exercício 3 --- Funções}
+Implemente a função \texttt{void trocar(int *a, int *b)} e utilize-a em um programa de teste. Em seguida, volte ao Exercício 3 do Capítulo 4 e explique, com suas palavras, o que precisou mudar para que a troca passasse a funcionar.
+
+\subsection*{Exercício 4 --- Vetores}
+Escreva um programa que declare um vetor de 8 inteiros e o percorra \textbf{utilizando apenas um ponteiro}, sem usar o operador de índice \texttt{[]}, exibindo cada elemento e o endereço em que ele está armazenado. Observe a diferença entre endereços consecutivos e relacione-a com \texttt{sizeof(int)}.
+
+\subsection*{Exercício 5 --- Integrador}
+Escreva uma função \texttt{void estatisticas(const int *v, int n, double *media, int *maior, int *menor)} que receba um vetor e seu tamanho e devolva, por meio dos três últimos parâmetros, a média, o maior e o menor elemento. Dentro da função, percorra o vetor utilizando aritmética de ponteiros. Em \texttt{main}, chame a função e exiba os resultados.
+
+\subsection*{Exercício 6 --- Desafio}
+O programa abaixo contém \textbf{cinco erros} relacionados a ponteiros, de naturezas diferentes. Encontre-os, explique por que cada um é um problema e corrija o programa.
+
+\begin{lstlisting}
+#include <stdio.h>
+
+int main(void) {
+    int a = 10;
+    int b = 20;
+    int *p;
+    int *q = a;
+    int *r = NULL;
+
+    *p = 5;
+    printf("%d\n", *r);
+    printf("%d\n", *(&a + 1));
+
+    q = &b;
+    printf("%d\n", q);
+    return 0;
+}
+\end{lstlisting}
+
+Depois de corrigi-lo, escreva uma versão em que o último \texttt{printf} exiba, corretamente, o valor de \texttt{b} em vez de seu endereço.
+
+\end{exercicio}

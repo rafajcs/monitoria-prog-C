@@ -28,7 +28,9 @@ O repositório é organizado para separar o material mais detalhado (apostila) d
   - [5. Vetores](guias/05-vetores.md)
   - [6. Strings](guias/06-strings.md)
   - [7. Arrays Multidimensionais](guias/07-arrays-multidimensionais.md)
-  - [8. Ponteiros](guias/08-ponteiros.md)  
+  - [8. Ponteiros](guias/08-ponteiros.md)
+  - [9. Organização da Memória](guias/09-organizacao-da-memoria.md)
+  - [10. Alocação Dinâmica](guias/10-alocacao-dinamica.md)
 
 - **Onde encontrar os Slides**: Acesse a pasta `slides/` e procure o diretório do capítulo correspondente.
 - **Onde encontrar Exercícios e Códigos**: Navegue em `exercicios/` para testar seus conhecimentos e em `codigos/` para ler e executar os exemplos em C abordados nos capítulos.

@@ -3,7 +3,7 @@ layout: default
 title: 8. Ponteiros
 ---
 
-[🏠 Início](../README.md) | [⬅️ Anterior: Arrays Multidimensionais](07-arrays-multidimensionais.md)
+[🏠 Início](../README.md) | [⬅️ Anterior: Arrays Multidimensionais](07-arrays-multidimensionais.md) | [Próximo ➡️](09-organizacao-da-memoria.md)
 
 ---
 

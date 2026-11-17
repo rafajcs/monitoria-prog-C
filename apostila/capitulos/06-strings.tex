@@ -1,0 +1,211 @@
+\chapter{Strings}
+No capítulo anterior, aprendemos a trabalhar com vetores: sequências de elementos do mesmo tipo, armazenados de forma contígua na memória. Neste capítulo, vamos aplicar exatamente esses mesmos conceitos a um caso particular extremamente importante — a representação de texto.
+
+É fundamental deixar uma ideia clara desde o início: \textbf{C não possui um tipo primitivo chamado \texttt{string}}. Diferente de Python, Java ou JavaScript, onde texto é um tipo de dado nativo com seus próprios operadores e métodos, em C uma string é simplesmente um \textbf{vetor de \texttt{char}}, seguindo uma convenção específica que vamos entender neste capítulo. Tudo o que aprendemos sobre vetores — declaração, índices, percurso com \texttt{for}, passagem para funções — se aplica diretamente aqui.
+
+\section{O que é uma String em C?}
+\label{sec:string-conceito}
+
+Uma string, em C, é um vetor de caracteres (\texttt{char}) que termina com um caractere especial, chamado \textbf{terminador nulo}, representado por \texttt{'\textbackslash 0'}. Esse terminador marca onde o texto 'real' acaba dentro do vetor.
+
+\begin{lstlisting}
+char nome[20];
+\end{lstlisting}
+
+Esse trecho reserva espaço para até 20 caracteres, mas isso não significa que a string armazenada ali usará necessariamente todo esse espaço. O que importa não é o tamanho do vetor, e sim onde o \texttt{'\textbackslash 0'} aparece dentro dele.
+
+\section{Inicialização de Strings}
+
+A forma mais comum de inicializar uma string é por meio de uma \textbf{string literal}, entre aspas duplas:
+
+\begin{lstlisting}
+char nome[] = "Rafael";
+\end{lstlisting}
+
+Essa linha é, na prática, equivalente a inicializar manualmente um vetor de \texttt{char}, caractere por caractere, incluindo o terminador nulo ao final:
+
+\begin{lstlisting}
+char nome[] = {'R', 'a', 'f', 'a', 'e', 'l', '\0'};
+\end{lstlisting}
+
+Note que o vetor \texttt{nome} tem, na verdade, \textbf{7 posições}, e não 6 — a string literal \texttt{"Rafael"} inclui automaticamente o \texttt{'\textbackslash 0'} ao final, ainda que ele não apareça explicitamente entre as aspas. Esquecer desse caractere extra é uma fonte comum de erros ao reservar espaço manualmente para strings, como veremos na Seção~\ref{sec:strings-erros}.
+
+\section{O Caractere \texttt{'\textbackslash 0'}}
+
+O terminador nulo merece atenção especial, porque é a peça que sustenta todo o funcionamento de strings em C.
+
+Como uma string é apenas um vetor de \texttt{char}, e um vetor, por si só, não "sabe" quantos de seus elementos estão efetivamente em uso, funções como \texttt{printf} e \texttt{strlen} precisam de alguma forma de saber onde o texto termina. A convenção adotada por C é: \textbf{o texto vai do primeiro caractere até, mas sem incluir, o primeiro \texttt{'\textbackslash 0'} encontrado}. Tudo que estiver no vetor depois disso é ignorado por essas funções, mesmo que o vetor tenha espaço reservado além desse ponto.
+
+\begin{errocomum}
+Confundir o caractere \texttt{'\textbackslash 0'} (terminador nulo, valor numérico \texttt{0}) com o caractere \texttt{'0'} (o dígito zero, valor numérico 48 na tabela ASCII):
+\begin{lstlisting}
+char digito = '0';   // o caractere que representa o digito zero
+char fim = '\0';     // o terminador nulo, usado para marcar o fim de uma string
+\end{lstlisting}
+Visualmente parecidos, esses dois caracteres têm significados completamente diferentes. Usar \texttt{'0'} onde deveria estar \texttt{'\textbackslash 0'} é um erro sutil: o compilador não vai reclamar, mas funções que dependem do terminador nulo para saber onde parar (como \texttt{printf} com \texttt{\%s}) vão continuar lendo memória além do que você pretendia.
+\end{errocomum}
+
+Uma consequência direta disso: o \textbf{tamanho do vetor} que armazena uma string quase sempre precisa ser \textbf{maior} do que o número de caracteres "visíveis" do texto, para acomodar também o \texttt{'\textbackslash 0'}. Um vetor de 20 posições, como o declarado na Seção~\ref{sec:string-conceito}, pode armazenar textos de até 19 caracteres — a vigésima posição precisa sobrar para o terminador.
+
+\section{Entrada e Saída de Strings}
+
+Já usamos \texttt{printf} para exibir strings desde o Capítulo 1, com o especificador \texttt{\%s}:
+
+\begin{lstlisting}
+char nome[] = "Rafael";
+printf("Ola, %s!\n", nome);
+\end{lstlisting}
+
+Para ler uma string digitada pelo usuário, também podemos usar \texttt{scanf} com \texttt{\%s}:
+
+\begin{lstlisting}
+char nome[20];
+scanf("%s", nome);
+\end{lstlisting}
+
+Note que, diferente do que fizemos com \texttt{int} e \texttt{float} no Capítulo 2, \textbf{não usamos o \texttt{\&} antes de \texttt{nome}}. Isso acontece porque, como vimos na Seção~\ref{sec:vetores-ponteiros}, o nome de um vetor já representa o endereço do seu primeiro elemento — e é exatamente esse endereço que \texttt{scanf} precisa receber.
+
+O \texttt{scanf} com \texttt{\%s}, no entanto, tem uma limitação importante: ele interrompe a leitura no primeiro espaço em branco, o que o torna inadequado para ler frases inteiras (como "Rafael Silva"). Além disso, ele não tem nenhuma noção do tamanho do vetor de destino, o que abre espaço para o vetor receber mais caracteres do que ele comporta.
+
+Uma alternativa mais adequada para ler linhas completas de texto é a função \texttt{fgets}:
+
+\begin{lstlisting}
+char frase[50];
+fgets(frase, 50, stdin);
+\end{lstlisting}
+
+Diferente de \texttt{scanf}, \texttt{fgets} recebe explicitamente o tamanho máximo do vetor de destino, o que o torna uma escolha mais segura. Não vamos nos aprofundar agora em todas as nuances de entrada segura de texto — o objetivo desta seção é apenas entender, de forma geral, como strings entram e saem de um programa em C.
+
+\section{Funções da Biblioteca \texttt{<string.h>}}
+
+C não tem operadores nativos para trabalhar com strings — não é possível, por exemplo, comparar duas strings com \texttt{==} ou concatená-las com \texttt{+}, como em outras linguagens. Para isso, usamos as funções fornecidas pela biblioteca \texttt{<string.h>}. As mais importantes, neste momento, são:
+
+\begin{itemize}
+    \item \texttt{strlen(s)}: devolve o número de caracteres de \texttt{s}, \textbf{sem contar} o terminador nulo.
+    \item \texttt{strcpy(destino, origem)}: copia o conteúdo de \texttt{origem} para \texttt{destino}, incluindo o terminador nulo.
+    \item \texttt{strncpy(destino, origem, n)}: semelhante a \texttt{strcpy}, mas copia no máximo \texttt{n} caracteres — uma alternativa mais segura quando o tamanho de \texttt{destino} é limitado.
+    \item \texttt{strcmp(s1, s2)}: compara \texttt{s1} e \texttt{s2}, devolvendo \texttt{0} se forem iguais (e um valor diferente de zero caso contrário).
+    \item \texttt{strcat(destino, origem)}: concatena \texttt{origem} ao final de \texttt{destino}.
+\end{itemize}
+
+\begin{lstlisting}
+#include <string.h>
+
+char nome[20] = "Rafael";
+printf("%zu\n", strlen(nome)); // exibe 6
+
+char copia[20];
+strcpy(copia, nome);
+
+if (strcmp(nome, copia) == 0) {
+    printf("As strings sao iguais\n");
+}
+\end{lstlisting}
+
+O objetivo aqui não é decorar essa lista, e sim entender \textbf{o que cada função faz de fato} com o vetor de caracteres por trás da string — em particular, é importante notar que \texttt{strcpy} e \texttt{strcat} \textbf{escrevem} no vetor de destino, e por isso ele precisa ter espaço suficiente reservado previamente, ou o programa corre o risco de escrever além dos limites do vetor.
+
+\section{Strings e Funções}
+
+Assim como vetores em geral, strings são passadas para funções por meio do endereço de seu primeiro caractere — um parâmetro do tipo \texttt{char *} (que estudaremos formalmente na Parte III, mas que já podemos usar de forma intuitiva agora):
+
+\begin{lstlisting}
+#include <ctype.h> // necessario para toupper
+
+void exibir_maiusculo(char texto[]) {
+    for (int i = 0; texto[i] != '\0'; i++) {
+        printf("%c", toupper(texto[i]));
+    }
+    printf("\n");
+}
+\end{lstlisting}
+
+Quando uma função apenas \textbf{lê} uma string, sem modificá-la, é uma boa prática declarar o parâmetro como \texttt{const char *}, sinalizando — tanto para o compilador quanto para quem lê o código — que a função não deve (e não vai) alterar o conteúdo recebido:
+
+\begin{lstlisting}
+void exibir(const char texto[]) {
+    printf("%s\n", texto);
+}
+\end{lstlisting}
+
+Se, por outro lado, a função precisa \textbf{devolver} uma nova string, é preciso ter cuidado especial: uma string criada dentro de uma função, em um vetor local, deixa de existir assim que a função termina — devolver o endereço desse vetor resultaria em um endereço inválido. Esse problema só será completamente resolvido quando estudarmos alocação dinâmica de memória, na Parte III; por ora, o caminho mais simples é fazer a função escrever o resultado diretamente em um vetor fornecido pelo chamador, como fizemos com \texttt{strcpy}.
+
+\section{Percorrendo Strings Manualmente}
+
+Como uma string é apenas um vetor terminado em \texttt{'\textbackslash 0'}, podemos percorrê-la sem sequer conhecer seu tamanho de antemão — basta avançar enquanto o caractere atual não for o terminador:
+
+\begin{lstlisting}
+for (int i = 0; texto[i] != '\0'; i++) {
+    // processa texto[i]
+}
+\end{lstlisting}
+
+Esse padrão é extremamente comum e serve de base para praticamente qualquer processamento de texto "na mão", sem depender de \texttt{<string.h>}:
+
+\begin{itemize}
+    \item Contar quantos caracteres uma string possui (reimplementando \texttt{strlen}).
+    \item Contar quantas vogais aparecem em um texto.
+    \item Converter cada caractere para maiúsculo ou minúsculo.
+    \item Procurar a primeira ocorrência de um caractere específico.
+\end{itemize}
+
+Por exemplo, uma implementação manual de \texttt{strlen}:
+
+\begin{lstlisting}
+int meu_strlen(const char texto[]) {
+    int contador = 0;
+    while (texto[contador] != '\0') {
+        contador++;
+    }
+    return contador;
+}
+\end{lstlisting}
+
+Implementar essas funções "do zero" — mesmo sabendo que versões prontas existem em \texttt{<string.h>} — é um exercício particularmente valioso para consolidar a ideia de que uma string não é uma "caixa mágica de texto", mas sim um vetor comum, percorrido com a mesma lógica que já dominamos no Capítulo 5.
+
+\section{Erros Comuns}
+\label{sec:strings-erros}
+
+\begin{itemize}
+    \item Esquecer de reservar espaço para o \texttt{'\textbackslash 0'} ao dimensionar um vetor de \texttt{char} manualmente.
+    \item Confundir \texttt{'A'} (um único \texttt{char}) com \texttt{"A"} (uma string de um caractere, que na verdade ocupa duas posições: \texttt{'A'} e \texttt{'\textbackslash 0'}).
+    \item Reservar espaço insuficiente para o resultado de \texttt{strcpy} ou \texttt{strcat}, escrevendo além dos limites do vetor de destino.
+    \item Usar \texttt{sizeof} esperando obter o comprimento da string: \texttt{sizeof} devolve o tamanho \textbf{do vetor} (em bytes), não o número de caracteres úteis do texto — que é exatamente o que \texttt{strlen} calcula.
+    \item Ultrapassar o tamanho do vetor ao ler uma entrada maior do que o esperado com \texttt{scanf}.
+    \item Confundir o nome de um vetor de \texttt{char} com um ponteiro genérico, esquecendo que ele sempre aponta para um espaço de memória de tamanho fixo, definido na declaração.
+\end{itemize}
+
+\section*{Resumo do Capítulo}
+Neste capítulo, entendemos que strings em C não são um tipo à parte, mas sim uma aplicação direta do que aprendemos sobre vetores no capítulo anterior: um vetor de \texttt{char}, terminado pelo caractere especial \texttt{'\textbackslash 0'}. Vimos como inicializar, ler e exibir strings, conhecemos as principais funções de \texttt{<string.h>} e, mais importante, aprendemos a percorrer uma string manualmente — uma habilidade que reforça a compreensão de que texto, em C, é simplesmente memória organizada de uma forma específica. No próximo capítulo, damos um passo além na organização de dados, estendendo a ideia de vetor para mais de uma dimensão.
+
+\begin{objetivos}
+\begin{itemize}
+    \item Explicar por que uma string em C é, na verdade, um vetor de \texttt{char}.
+    \item Explicar o papel do caractere \texttt{'\textbackslash 0'} na representação de strings.
+    \item Inicializar, ler e exibir strings corretamente.
+    \item Utilizar as principais funções de \texttt{<string.h>}: \texttt{strlen}, \texttt{strcpy}, \texttt{strncpy}, \texttt{strcmp} e \texttt{strcat}.
+    \item Passar strings para funções, diferenciando parâmetros que apenas leem (\texttt{const char *}) de parâmetros que escrevem.
+    \item Percorrer uma string manualmente usando seu terminador nulo como condição de parada.
+    \item Reconhecer e evitar os erros mais comuns ao manipular strings.
+\end{itemize}
+\end{objetivos}
+
+\section*{Exercícios}
+
+\begin{exercicio}
+
+\subsection*{Exercício 1 --- Fixação}
+Declare uma string, leia um nome digitado pelo usuário com \texttt{scanf} e exiba, em seguida, quantos caracteres ele possui, usando \texttt{strlen}.
+
+\subsection*{Exercício 2 --- Aplicação}
+Escreva uma função \texttt{int contar\_vogais(const char texto[])} que percorra a string manualmente (sem usar \texttt{<string.h>}) e devolva quantas vogais ela contém, considerando maiúsculas e minúsculas.
+
+\subsection*{Exercício 3 --- Implementação Clássica}
+Implemente, sem usar \texttt{<string.h>}, uma função \texttt{int minha\_strcmp(const char s1[], const char s2[])} que se comporte como a função \texttt{strcmp} da biblioteca padrão: devolvendo \texttt{0} se as strings forem iguais, e um valor diferente de zero caso contrário.
+
+\subsection*{Exercício 4 --- Integrador}
+Escreva um programa que leia uma frase (usando \texttt{fgets}) e, usando funções separadas para cada tarefa, seja capaz de: (a) contar o número de palavras da frase (considerando espaços como separadores); (b) converter a frase inteira para maiúsculas; (c) verificar se a frase é um palíndromo, ignorando espaços.
+
+\subsection*{Exercício 5 --- Desafio}
+Sem usar \texttt{strcpy}, implemente uma função \texttt{void minha\_strcpy(char destino[], const char origem[])} que copie o conteúdo de \texttt{origem} para \texttt{destino}, caractere por caractere, garantindo que o terminador nulo também seja copiado corretamente.
+
+\end{exercicio}

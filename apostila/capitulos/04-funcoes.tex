@@ -1,0 +1,265 @@
+\chapter{Funções}
+
+Até aqui, todo o código dos nossos programas viveu dentro de uma única função: \texttt{main}. Isso funciona para programas pequenos, mas rapidamente se torna insustentável à medida que a complexidade cresce. Imagine um programa que precisa calcular a média de notas de uma turma em três momentos diferentes — copiar e colar o mesmo trecho de cálculo três vezes não só é repetitivo, como também é um convite a erros: se um dia você precisar corrigir a fórmula, terá que lembrar de alterá-la em todos os lugares onde ela foi copiada.
+
+\textbf{Funções} resolvem exatamente esse problema. Uma função é um bloco de código nomeado, que pode ser \textbf{reutilizado} quantas vezes for necessário, recebendo diferentes entradas e produzindo diferentes saídas a cada chamada. Você já usa funções desde o Capítulo 1, mesmo sem ter percebido: \texttt{printf} e \texttt{scanf} nada mais são do que funções prontas, fornecidas pela biblioteca padrão de C. Neste capítulo, vamos aprender a criar as nossas próprias.
+
+Organizar um programa em funções traz benefícios que vão muito além de "economizar digitação":
+
+\begin{itemize}
+    \item \textbf{Reutilização}: um mesmo trecho de lógica pode ser chamado de vários pontos do programa.
+    \item \textbf{Organização}: um problema grande pode ser dividido em subproblemas menores, cada um resolvido por uma função — retomando diretamente a ideia de decomposição de problemas que apresentamos no Capítulo 1.
+    \item \textbf{Manutenção}: corrigir um erro ou melhorar um algoritmo em um único lugar automaticamente corrige ou melhora todos os pontos do programa que dependem dele.
+    \item \textbf{Legibilidade}: um \texttt{main} composto por chamadas a funções bem nomeadas (como \texttt{calcular\_media(notas)}) costuma ser muito mais fácil de entender do que um bloco único e extenso de instruções.
+\end{itemize}
+
+\section{Declaração}
+
+Declarar (ou, mais precisamente, \textbf{definir}) uma função em C significa escrever seu código completo: seu nome, os dados que ela recebe, o tipo de dado que ela devolve e as instruções que ela executa.
+
+A estrutura geral de uma função é:
+
+\begin{lstlisting}
+tipo_de_retorno nome_da_funcao(parametros) {
+    // corpo da funcao
+    return valor; // se houver retorno
+}
+\end{lstlisting}
+
+Vamos ver um exemplo completo, de uma função que soma dois números inteiros:
+
+\begin{lstlisting}
+int somar(int a, int b) {
+    int resultado = a + b;
+    return resultado;
+}
+\end{lstlisting}
+
+Dissecando essa declaração:
+
+\begin{itemize}
+    \item \texttt{int} (antes do nome) é o \textbf{tipo de retorno} — o tipo do valor que a função devolve para quem a chamou.
+    \item \texttt{somar} é o \textbf{nome} da função, seguindo as mesmas regras de identificadores já vistas para variáveis, no Capítulo 2.
+    \item \texttt{(int a, int b)} é a \textbf{lista de parâmetros} — os dados que a função recebe como entrada, cada um com seu próprio tipo e nome.
+    \item \texttt{return resultado;} devolve o valor calculado para quem chamou a função, e encerra sua execução naquele ponto.
+\end{itemize}
+
+Para \textbf{chamar} (ou \textbf{invocar}) essa função a partir de \texttt{main}, usamos seu nome seguido dos valores desejados entre parênteses:
+
+\begin{lstlisting}
+int main(void) {
+    int total = somar(5, 3);
+    printf("%d\n", total); // exibe 8
+    return 0;
+}
+\end{lstlisting}
+
+Os valores \texttt{5} e \texttt{3}, passados na chamada, são copiados para os parâmetros \texttt{a} e \texttt{b} dentro da função — voltaremos a esse mecanismo com mais detalhe na Seção~\ref{sec:passagem-por-valor}.
+
+\subsection{Funções sem retorno: \texttt{void}}
+
+Nem toda função precisa devolver um valor. Quando uma função apenas realiza uma ação (como exibir algo na tela), sem produzir um resultado a ser usado depois, seu tipo de retorno é \texttt{void}:
+
+\begin{lstlisting}
+void saudar(char nome[]) {
+    printf("Ola, %s!\n", nome);
+}
+\end{lstlisting}
+
+Uma função \texttt{void} pode usar \texttt{return;} (sem nenhum valor após a palavra-chave) para encerrar sua execução antecipadamente, mas não pode usar \texttt{return} seguido de um valor.
+
+\subsection{Funções sem parâmetros}
+
+Quando uma função não precisa receber nenhuma entrada, indicamos isso com \texttt{void} dentro dos parênteses — exatamente como já fazíamos com \texttt{main}, desde o Capítulo 1:
+
+\begin{lstlisting}
+void exibir_menu(void) {
+    printf("1. Iniciar\n");
+    printf("2. Sair\n");
+}
+\end{lstlisting}
+
+\begin{errocomum}
+Esquecer o \texttt{return} em uma função que promete devolver um valor, ou tentar usar o resultado de uma função \texttt{void} como se ela retornasse algo:
+\begin{lstlisting}
+int dobro(int x) {
+    int resultado = x * 2;
+    // faltou o return!
+}
+
+int main(void) {
+    int y = dobro(5); // comportamento indefinido: dobro nao devolveu nada
+    return 0;
+}
+\end{lstlisting}
+Se uma função é declarada com um tipo de retorno diferente de \texttt{void}, ela \textbf{precisa} garantir um \texttt{return} com um valor compatível em todos os caminhos possíveis de execução. Muitos compiladores emitem apenas um \textit{warning} nesse caso, e não um erro — o que torna esse descuido especialmente perigoso, já que o programa compila normalmente, mas se comporta de forma imprevisível.
+\end{errocomum}
+
+\section{Protótipos}
+
+Em C, o compilador lê o arquivo de cima para baixo, uma única vez. Isso significa que, se uma função for chamada em um ponto do código \textbf{antes} de sua definição completa aparecer, o compilador não terá como saber, naquele momento, quantos parâmetros ela espera ou qual valor ela devolve.
+
+\begin{lstlisting}
+int main(void) {
+    int total = somar(5, 3); // erro: somar ainda nao foi declarada!
+    return 0;
+}
+
+int somar(int a, int b) {
+    return a + b;
+}
+\end{lstlisting}
+
+A solução para esse problema é o \textbf{protótipo} de função: uma declaração antecipada, contendo apenas a "assinatura" da função (tipo de retorno, nome e tipos dos parâmetros), sem o corpo. O protótipo é colocado no início do arquivo, antes de \texttt{main}, avisando o compilador sobre a existência da função antes mesmo de sua definição completa ter sido lida:
+
+\begin{lstlisting}
+int somar(int a, int b); // prototipo
+
+int main(void) {
+    int total = somar(5, 3); // agora o compilador ja conhece somar
+    printf("%d\n", total);
+    return 0;
+}
+
+int somar(int a, int b) { // definicao completa
+    return a + b;
+}
+\end{lstlisting}
+
+Note que o protótipo termina com ponto e vírgula, e não possui corpo — ele é apenas uma promessa de que a função será definida em algum lugar do programa. Os nomes dos parâmetros no protótipo são opcionais (o compilador só se importa com os tipos), então também seria válido escrever apenas \texttt{int somar(int, int);} — mas é uma boa prática manter os nomes, já que eles funcionam como documentação de uso da função.
+
+\begin{errocomum}
+Declarar um protótipo com uma assinatura e depois definir a função com outra, diferente:
+\begin{lstlisting}
+int somar(int a, int b); // prototipo promete devolver int
+
+void somar(int a, int b) { // definicao devolve void: incompatibilidade!
+    printf("%d\n", a + b);
+}
+\end{lstlisting}
+O protótipo e a definição da função precisam ser absolutamente consistentes quanto ao tipo de retorno e aos tipos dos parâmetros. Divergências como essa resultam em erro de compilação, e a mensagem gerada pelo compilador costuma apontar diretamente para essa incompatibilidade — vale a pena aprender a interpretá-la.
+\end{errocomum}
+
+Na prática, à medida que os programas crescem, é comum organizar os protótipos das funções em \textbf{arquivos de cabeçalho} (\textit{header files}, com extensão \texttt{.h}), permitindo que várias partes de um projeto compartilhem as mesmas declarações. Essa organização mais avançada será retomada quando estudarmos como dividir um programa em múltiplos arquivos-fonte.
+
+\section{Passagem por Valor}
+\label{sec:passagem-por-valor}
+
+Quando você chama uma função e passa argumentos para ela, como em \texttt{somar(5, 3)}, o que exatamente acontece com esses valores dentro da função? Em C, o mecanismo padrão de passagem de argumentos é chamado de \textbf{passagem por valor}.
+
+Isso significa que, ao chamar uma função, C \textbf{copia} o valor de cada argumento para dentro do parâmetro correspondente. A função passa a trabalhar com essa cópia local, e \textbf{qualquer alteração feita no parâmetro dentro da função não afeta a variável original}, de fora da função.
+
+Vamos observar isso com cuidado:
+
+\begin{lstlisting}
+void dobrar(int numero) {
+    numero = numero * 2;
+    printf("Dentro da funcao: %d\n", numero);
+}
+
+int main(void) {
+    int valor = 10;
+    dobrar(valor);
+    printf("Fora da funcao: %d\n", valor);
+    return 0;
+}
+\end{lstlisting}
+
+A saída desse programa é:
+
+\begin{lstlisting}
+Dentro da funcao: 20
+Fora da funcao: 10
+\end{lstlisting}
+
+Mesmo depois de chamar \texttt{dobrar(valor)}, a variável \texttt{valor} em \texttt{main} continua com o valor \texttt{10}. Isso acontece porque \texttt{numero}, dentro da função \texttt{dobrar}, é uma \textbf{variável completamente separada} de \texttt{valor} — ela apenas recebeu, no momento da chamada, uma \textbf{cópia} do valor armazenado em \texttt{valor}. Alterar \texttt{numero} altera apenas essa cópia local, que deixa de existir assim que a função termina.
+
+\begin{center}
+\texttt{
+\begin{tabular}{|c|c|}
+\hline
+\textbf{main} & \textbf{dobrar} \\
+\hline
+valor = 10 & numero = 10 (copia) \\
+ & numero = 20 (apos o dobro) \\
+\hline
+valor continua 10 & numero deixa de existir \\
+\hline
+\end{tabular}
+}
+\end{center}
+
+Esse comportamento é consistente com tudo o que discutimos no Capítulo 2 sobre variáveis e memória: cada variável ocupa seu próprio espaço, e uma atribuição como \texttt{numero = numero * 2} apenas modifica o conteúdo do espaço de memória de \texttt{numero}, sem qualquer relação com o espaço de memória de \texttt{valor}.
+
+\begin{errocomum}
+Esperar que uma função modifique, "por fora", uma variável passada como argumento:
+\begin{lstlisting}
+void zerar(int x) {
+    x = 0;
+}
+
+int main(void) {
+    int saldo = 100;
+    zerar(saldo);
+    printf("%d\n", saldo); // ainda imprime 100, e nao 0!
+    return 0;
+}
+\end{lstlisting}
+Essa é uma das maiores fontes de confusão para quem está começando em C. A função \texttt{zerar} realmente zera sua cópia local de \texttt{x}, mas isso não tem nenhum efeito sobre \texttt{saldo}, em \texttt{main}. Se o objetivo é que uma função altere o valor de uma variável que existe fora dela, a passagem por valor \textbf{não é suficiente} — será necessário um mecanismo diferente.
+\end{errocomum}
+
+E é exatamente aqui que fechamos a Parte I da apostila com uma pergunta em aberto, no mesmo espírito da que deixamos no Capítulo 2 sobre o \texttt{\&} do \texttt{scanf}:
+
+\begin{quote}
+\textit{Se a passagem por valor sempre trabalha com cópias, como faz o \texttt{scanf} para efetivamente alterar o valor de uma variável declarada em \texttt{main}? E como poderíamos escrever nossas próprias funções capazes de fazer o mesmo?}
+\end{quote}
+
+A resposta para essas perguntas — e a peça que finalmente vai unir tudo o que vimos sobre memória, o operador \texttt{\&} e a passagem de argumentos — será o assunto central da \textbf{Parte III} da apostila, dedicada ao gerenciamento de memória e \textbf{ponteiros}. Antes disso, porém, na \textbf{Parte II}, vamos aprender a organizar coleções de dados com vetores, strings e matrizes — onde já veremos, na prática, os primeiros indícios de como endereços de memória entram em cena.
+
+\section*{Resumo do Capítulo}
+Neste capítulo, aprendemos a organizar nosso código em funções: blocos reutilizáveis, capazes de receber entradas (parâmetros) e produzir saídas (valores de retorno). Vimos como declarar e definir uma função, por que protótipos são necessários para que o compilador conheça uma função antes de sua definição completa, e como funciona a passagem por valor — o mecanismo padrão de C para enviar argumentos a uma função, sempre por meio de cópias. Encerramos com uma pergunta propositalmente sem resposta completa, que vai guiar nosso caminho até o estudo de ponteiros.
+
+\begin{objetivos}
+\begin{itemize}
+    \item Declarar e definir funções com e sem retorno, com e sem parâmetros.
+    \item Explicar por que e quando um protótipo de função é necessário.
+    \item Diferenciar protótipo e definição de uma função.
+    \item Explicar o funcionamento da passagem por valor em C.
+    \item Prever corretamente se uma alteração feita dentro de uma função afeta ou não a variável original, fora dela.
+\end{itemize}
+\end{objetivos}
+
+\section*{Exercícios}
+
+\begin{exercicio}
+
+\subsection*{Exercício 1 --- Fixação}
+Escreva uma função \texttt{int quadrado(int n)} que devolva o quadrado do número recebido como parâmetro. Escreva também o protótipo correspondente, e chame a função a partir de \texttt{main} para exibir o quadrado de um número digitado pelo usuário.
+
+\subsection*{Exercício 2 --- Aplicação}
+Escreva um programa com três funções: \texttt{ler\_nota}, responsável por ler uma nota digitada pelo usuário e devolvê-la (chame-a três vezes em \texttt{main}); \texttt{calcular\_media}, que recebe as três notas e devolve a média entre elas; e \texttt{exibir\_resultado}, que recebe a média e exibe se o aluno foi aprovado (média maior ou igual a 6) ou reprovado. Utilize protótipos para todas as funções antes de \texttt{main}.
+
+\subsection*{Exercício 3 --- Desafio}
+Considere o programa a seguir:
+
+\begin{lstlisting}
+void trocar(int a, int b) {
+    int temp = a;
+    a = b;
+    b = temp;
+}
+
+int main(void) {
+    int x = 5, y = 10;
+    trocar(x, y);
+    printf("x = %d, y = %d\n", x, y);
+    return 0;
+}
+\end{lstlisting}
+
+Qual será a saída exibida por esse programa? Explique, com base no que aprendemos sobre passagem por valor, por que a função \texttt{trocar} \textbf{não consegue} trocar de fato os valores de \texttt{x} e \texttt{y} em \texttt{main}. O que você imagina que precisaria mudar, na declaração da função e em sua chamada, para que essa troca realmente funcionasse?
+
+\end{exercicio}
+
+
+%----------------------------------------

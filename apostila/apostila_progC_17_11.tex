@@ -3,14 +3,12 @@
 
 % Fontes
 \usepackage{fontspec}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
 
 %\setmainfont{TeX Gyre Pagella}
 %\setmainfont{Palatino Linotype}
 
 % Idioma
-\usepackage[brazil]{babel}
+\usepackage[brazilian]{babel}
 
 % Margens
 \usepackage[
@@ -249,7 +247,7 @@ Esta apostila foi organizada para funcionar como um roteiro de aprendizagem. Em 
 
 Cada capítulo inicia com uma breve introdução, contextualizando a importância do tema e sua relação com os assuntos já estudados. Em seguida, o desenvolvimento apresenta os conceitos fundamentais, exemplos comentados e trechos de código que ilustram sua aplicação prática. Sempre que pertinente, caixas de observação, curiosidades e erros comuns destacam informações importantes, aplicações interessantes e equívocos frequentes entre estudantes, especialmente aqueles que estão migrando de linguagens de alto nível, como Python, para a linguagem C.
 
-Ao final de cada capítulo, um resumo sintetiza os principais conceitos estudados, seguido por uma lista de objetivos de aprendizagem que funciona como um checklist para revisão. Por fim, são propostos três exercícios em ordem crescente de dificuldade: o primeiro busca consolidar os conceitos apresentados; o segundo incentiva sua aplicação na resolução de pequenos problemas; e o terceiro propõe um desafio ou reflexão que prepara o terreno para os capítulos seguintes.
+Ao final de cada capítulo, um resumo sintetiza os principais conceitos estudados, seguido por uma lista de objetivos de aprendizagem que funciona como um checklist para revisão. Por fim, são propostos exercícios em ordem crescente de dificuldade: os primeiros buscam consolidar os conceitos apresentados; os intermediários incentivam sua aplicação na resolução de problemas práticos; e os finais propõem desafios integradores ou reflexões que preparam o terreno para os capítulos seguintes.
 
 Recomenda-se que o leitor acompanhe os exemplos, implemente os programas apresentados e tente resolver os exercícios antes de consultar soluções ou materiais complementares. A aprendizagem da programação ocorre principalmente por meio da prática, da experimentação e da análise dos próprios erros. Esta apostila foi concebida para servir como um guia ao longo desse processo, podendo ser utilizada tanto no estudo individual quanto como material de apoio às monitorias e às disciplinas introdutórias de programação em C.
 
@@ -333,7 +331,7 @@ Nós pensamos e nos comunicamos em linguagem natural: português, inglês, e ass
 \begin{itemize}
 
     \item No nível mais baixo está o \textbf{código binário}, que o processador executa diretamente.
-    \item Um pouco acima está o \textbf{assembly}, que usa mnemônicos (como `MOV`, `ADD`, `JMP`) para representar instruções de máquina de forma um pouco mais legível para humanos, mas ainda extremamente ligada ao hardware.
+    \item Um pouco acima está o \textbf{assembly}, que usa mnemônicos (como \texttt{MOV}, \texttt{ADD}, \texttt{JMP}) para representar instruções de máquina de forma um pouco mais legível para humanos, mas ainda extremamente ligada ao hardware.
     \item Acima disso estão as \textbf{linguagens de alto nível}, como C, Python, Java, entre outras, que usam palavras e estruturas mais próximas do raciocínio humano.
     
 \end{itemize}
@@ -357,7 +355,7 @@ Com o tempo, C passou por processos de padronização formal — ANSI C (1989), 
 \section{Por que estudar C atualmente?}
 
 Se você já programou em Python, provavelmente nunca precisou se preocupar com onde uma variável estava armazenada na memória. Em C, essa preocupação deixa de ser um detalhe e passa a fazer parte da programação. Então, mais de cinquenta anos depois de criada, por qual motivo C continua extremamente relevante? 
-Não é apenas por tradição ou nostalgiam, existem razões práticas concretas:
+Não é apenas por tradição ou nostalgia, existem razões práticas concretas:
 
 
 \begin{itemize}
@@ -370,6 +368,7 @@ Em resumo: você não está aprendendo C apenas para "escrever programas em C". 
 
 
 \section{Estrutura de um programa em C}
+\label{sec:estrutura-programa}
 
 Tradicionalmente, o primeiro programa apresentado em uma linguagem de programação é aquele que exibe uma simples mensagem na tela. Embora pareça um exemplo modesto, esse programa reúne os principais elementos estruturais que aparecerão em praticamente todos os programas escritos em C. Por esse motivo, ele será utilizado como ponto de partida para compreender a organização básica de um programa.
 
@@ -385,7 +384,7 @@ int main(void)
 
 Vamos analisar, a seguir, cada parte desse programa.
 
-\begin{tcolorbox}[title=Curiosidade]
+\begin{curiosidade}
 
 Embora hoje seja tradição iniciar o estudo de uma linguagem de programação
 com um programa que imprime ``Hello, World!'', essa expressão foi
@@ -395,24 +394,24 @@ posteriormente, tornou-se mundialmente conhecida por meio do clássico
 \textit{The C Programming Language} (1978), escrito por Brian Kernighan e
 Dennis Ritchie.
 
-\end{tcolorbox}
+\end{curiosidade}
 
 Usando a numeração das linhas temos em ordem crescente:
 
 \texttt{\#include <stdio.h>} \\
-Essa linha é uma \textbf{diretiva de pré-processador}. Antes mesmo da compilação, ela instrui o pré-processador a incluir o conteúdo da biblioteca padrão de entrada e saída (`stdio.h`, de *standard input/output*), que contém a declaração de funções como `printf` (usada para exibir texto na tela) e `scanf` (usada para ler dados digitados pelo usuário).
+Essa linha é uma \textbf{diretiva de pré-processador}. Antes mesmo da compilação, ela instrui o pré-processador a incluir o conteúdo da biblioteca padrão de entrada e saída (\texttt{stdio.h}, de \textit{standard input/output}), que contém a declaração de funções como \texttt{printf} (usada para exibir texto na tela) e \texttt{scanf} (usada para ler dados digitados pelo usuário).
 
 \texttt{int main(void)} \\
-Toda execução de um programa em C começa em uma função chamada `main`. É o ponto de entrada de todo programa em C. O `int` antes do nome indica que essa função devolve um número inteiro ao sistema operacional quando termina — normalmente usado para indicar se o programa foi executado com sucesso ou não. O `void` entre parênteses indica que essa função não recebe parâmetros de entrada.
+Toda execução de um programa em C começa em uma função chamada \texttt{main}. É o ponto de entrada de todo programa em C. O \texttt{int} antes do nome indica que essa função devolve um número inteiro ao sistema operacional quando termina — normalmente usado para indicar se o programa foi executado com sucesso ou não. O \texttt{void} entre parênteses indica que essa função não recebe parâmetros de entrada.
 
 \texttt{\{...\}} \\
-As chaves delimitam o corpo da função, isto é, o conjunto de instruções que será executado quando a função for chamada. No caso da função main, esse bloco corresponde ao código executado quando o programa é iniciado.
+As chaves delimitam o corpo da função, isto é, o conjunto de instruções que será executado quando a função for chamada. No caso da função \texttt{main}, esse bloco corresponde ao código executado quando o programa é iniciado.
 
 \texttt{printf("Hello, world!\textbackslash n");} \\
-A função printf é utilizada para exibir informações na tela. Nesse exemplo, ela recebe como argumento a sequência de caracteres "Hello, world!\verb|\n|"., passando como argumento o texto que queremos exibir. O `\verb|\n|` no final é um caractere especial que representa uma quebra de linha. Note o ponto e vírgula (`;`) ao final — em C, ele marca o fim de cada instrução, e sua ausência é um dos erros mais comuns entre iniciantes.
+A função \texttt{printf} é utilizada para exibir informações na tela. Nesse exemplo, ela recebe como argumento a sequência de caracteres \texttt{"Hello, world!\textbackslash n"}, passando o texto que queremos exibir. O \texttt{\textbackslash n} no final é um caractere especial que representa uma quebra de linha. Note o ponto e vírgula (\texttt{;}) ao final — em C, ele marca o fim de cada instrução, e sua ausência é um dos erros mais comuns entre iniciantes.
 
 \texttt{return 0;} \\
-Essa linha finaliza a função `main`, devolvendo o valor `0` ao sistema operacional. Por convenção, `0` significa que o programa terminou sem erros. Em programas simples, essa linha costuma aparecer no final da função main. Ao longo da apostila veremos que outras funções também podem utilizar a instrução return para devolver resultados ao programa.
+Essa linha finaliza a função \texttt{main}, devolvendo o valor \texttt{0} ao sistema operacional. Por convenção, \texttt{0} significa que o programa terminou sem erros. Em programas simples, essa linha costuma aparecer no final da função \texttt{main}. Ao longo da apostila veremos que outras funções também podem utilizar a instrução \texttt{return} para devolver resultados ao programa.
 
 De forma geral, todo programa em C segue este esqueleto:
 
@@ -429,21 +428,21 @@ int main(void) {
 
 Naturalmente, programas reais podem conter diversas outras funções, declarações, estruturas de dados e bibliotecas. Entretanto, a estrutura apresentada acima representa o núcleo de um programa em C e servirá como base para os próximos capítulos.
 
-\begin{tcolorbox}[title=Observação]
+\begin{observacao}
 
 Neste momento, não se preocupe em memorizar todos os detalhes do programa.
 Ao longo dos próximos capítulos, cada um desses elementos será estudado
 individualmente. O objetivo desta seção é apenas apresentar a estrutura geral
 de um programa em C e familiarizar o leitor com sua organização.
 
-\end{tcolorbox}
+\end{observacao}
 
 
 \section{Compilando o primeiro programa}
 
-Diferente de linguagens interpretadas, um programa em C precisa ser compilado antes de ser executado. O compilador lê o código-fonte (o arquivo `.c` que você escreveu) e gera um arquivo executável, específico para o sistema operacional e a arquitetura de hardware em que foi compilado.
+Diferente de linguagens interpretadas, um programa em C precisa ser compilado antes de ser executado. O compilador lê o código-fonte (o arquivo \texttt{.c} que você escreveu) e gera um arquivo executável, específico para o sistema operacional e a arquitetura de hardware em que foi compilado.
 
-Um dos compiladores mais usados, especialmente em ambientes Linux e no ensino, é o \textbf{GCC} (GNU Compiler Collection). Supondo que você tenha salvo o programa da seção 1.6 em um arquivo chamado `ola\_mundo.c`, o processo básico de compilação e execução no terminal seria:
+Um dos compiladores mais usados, especialmente em ambientes Linux e no ensino, é o \textbf{GCC} (GNU Compiler Collection). Supondo que você tenha salvo o programa da Seção~\ref{sec:estrutura-programa} em um arquivo chamado \texttt{ola\_mundo.c}, o processo básico de compilação e execução no terminal seria:
 
 
 \begin{terminal}
@@ -487,7 +486,7 @@ Ao longo do capítulo, você também conheceu o contexto histórico da linguagem
 
 Nos próximos capítulos, ampliaremos gradualmente essa estrutura, introduzindo variáveis, operadores, estruturas de controle e funções, até que você seja capaz de desenvolver programas cada vez mais completos.
 
-\begin{tcolorbox}[title={Ao final deste capítulo, você deve ser capaz de:}]
+\begin{objetivos}
 
 \begin{itemize}
     \item Explicar, em linhas gerais, como surgiu a linguagem C e sua importância histórica.
@@ -498,7 +497,7 @@ Nos próximos capítulos, ampliaremos gradualmente essa estrutura, introduzindo 
     \item Interpretar mensagens básicas de erro emitidas pelo compilador.
 \end{itemize}
 
-\end{tcolorbox}
+\end{objetivos}
 
 \section*{Erros comuns}
 
@@ -845,7 +844,7 @@ De forma geral, variáveis locais existem apenas enquanto a função em que fora
 \section*{Resumo do Capítulo}
 Neste capítulo, deixamos de tratar variáveis como simples "caixas de valores" e passamos a enxergá-las como regiões de memória com tipo, tamanho e representação bem definidos. Vimos os tipos fundamentais de C, como declarar e inicializar variáveis, os principais operadores da linguagem, como converter entre tipos e como realizar entrada e saída básica de dados. Também demos os primeiros passos sobre escopo — um assunto que vai se tornar cada vez mais importante conforme nossos programas crescerem.
 
-\begin{tcolorbox}[title={Ao final deste capítulo, você deve ser capaz de:}]
+\begin{objetivos}
 \begin{itemize}
     \item Declarar e inicializar variáveis em C.
     \item Identificar os principais tipos fundamentais.
@@ -855,7 +854,7 @@ Neste capítulo, deixamos de tratar variáveis como simples "caixas de valores" 
     \item Utilizar \texttt{printf} e \texttt{scanf} para entrada e saída simples.
     \item Diferenciar escopo local e global.
 \end{itemize}
-\end{tcolorbox}
+\end{objetivos}
 
 \section*{Exercícios}
 
@@ -1171,7 +1170,7 @@ Note que, a cada repetição do laço externo (controlado por \texttt{i}), o la�
 \section*{Resumo do Capítulo}
 Neste capítulo, aprendemos a alterar o fluxo sequencial padrão de um programa em C. Vimos como tomar decisões com \texttt{if}, \texttt{else if}, \texttt{else} e \texttt{switch}, e como repetir blocos de código com \texttt{while}, \texttt{do-while} e \texttt{for}. Também vimos como controlar o comportamento de um laço com \texttt{break} e \texttt{continue}, e discutimos armadilhas comuns, como confundir \texttt{=} com \texttt{==} e esquecer de atualizar a condição de um laço. Essas estruturas são a espinha dorsal de praticamente todo programa não trivial, e vamos utilizá-las constantemente dos próximos capítulos em diante.
 
-\begin{tcolorbox}[title={Ao final deste capítulo, você deve ser capaz de:}]
+\begin{objetivos}
 \begin{itemize}
     \item Utilizar \texttt{if}, \texttt{else if} e \texttt{else} para tomar decisões.
     \item Utilizar o operador ternário em condições simples.
@@ -1181,9 +1180,11 @@ Neste capítulo, aprendemos a alterar o fluxo sequencial padrão de um programa 
     \item Identificar e evitar laços infinitos.
     \item Trabalhar com condicionais e laços aninhados.
 \end{itemize}
-\end{tcolorbox}
+\end{objetivos}
 
 \section*{Exercícios}
+
+\begin{exercicio}
 
 \subsection*{Exercício 1 --- Fixação}
 Escreva um programa que leia um número inteiro digitado pelo usuário e informe, usando \texttt{if-else}, se ele é positivo, negativo ou igual a zero.
@@ -1195,6 +1196,8 @@ Escreva um programa que utilize um laço \texttt{for} para exibir todos os núme
 Escreva um programa que simule um menu simples utilizando \texttt{do-while} e \texttt{switch}. O menu deve oferecer três opções (por exemplo, "1. Somar dois números", "2. Verificar se um número é par ou ímpar", "0. Sair") e continuar sendo exibido até que o usuário escolha a opção de sair.
 
 Depois de implementar o programa, reflita: por que o \texttt{do-while} é mais adequado do que um \texttt{while} comum nesse cenário? O que mudaria no comportamento do programa se você tivesse usado um \texttt{while} no lugar?
+
+\end{exercicio}
 
 %----------------------------------------
 
@@ -1414,12 +1417,12 @@ E é exatamente aqui que fechamos a Parte I da apostila com uma pergunta em aber
 \textit{Se a passagem por valor sempre trabalha com cópias, como faz o \texttt{scanf} para efetivamente alterar o valor de uma variável declarada em \texttt{main}? E como poderíamos escrever nossas próprias funções capazes de fazer o mesmo?}
 \end{quote}
 
-A resposta para essas perguntas — e a peça que finalmente vai unir tudo o que vimos sobre memória, o operador \texttt{\&} e a passagem de argumentos — é o assunto central da Parte II da apostila, que começa com o estudo de \textbf{ponteiros}.
+A resposta para essas perguntas — e a peça que finalmente vai unir tudo o que vimos sobre memória, o operador \texttt{\&} e a passagem de argumentos — será o assunto central da \textbf{Parte III} da apostila, dedicada ao gerenciamento de memória e \textbf{ponteiros}. Antes disso, porém, na \textbf{Parte II}, vamos aprender a organizar coleções de dados com vetores, strings e matrizes — onde já veremos, na prática, os primeiros indícios de como endereços de memória entram em cena.
 
 \section*{Resumo do Capítulo}
-Neste capítulo, aprendemos a organizar nosso código em funções: blocos reutilizáveis, capazes de receber entradas (parâmetros) e produzir saídas (valores de retorno). Vimos como declarar e definir uma função, por que protótipos são necessários para que o compilador conheça uma função antes de sua definição completa, e como funciona a passagem por valor — o mecanismo padrão de C para enviar argumentos a uma função, sempre por meio de cópias. Encerramos com uma pergunta propositalmente sem resposta completa, que vai nos guiar diretamente ao próximo grande tema da apostila: ponteiros.
+Neste capítulo, aprendemos a organizar nosso código em funções: blocos reutilizáveis, capazes de receber entradas (parâmetros) e produzir saídas (valores de retorno). Vimos como declarar e definir uma função, por que protótipos são necessários para que o compilador conheça uma função antes de sua definição completa, e como funciona a passagem por valor — o mecanismo padrão de C para enviar argumentos a uma função, sempre por meio de cópias. Encerramos com uma pergunta propositalmente sem resposta completa, que vai guiar nosso caminho até o estudo de ponteiros.
 
-\begin{tcolorbox}[title={Ao final deste capítulo, você deve ser capaz de:}]
+\begin{objetivos}
 \begin{itemize}
     \item Declarar e definir funções com e sem retorno, com e sem parâmetros.
     \item Explicar por que e quando um protótipo de função é necessário.
@@ -1427,15 +1430,17 @@ Neste capítulo, aprendemos a organizar nosso código em funções: blocos reuti
     \item Explicar o funcionamento da passagem por valor em C.
     \item Prever corretamente se uma alteração feita dentro de uma função afeta ou não a variável original, fora dela.
 \end{itemize}
-\end{tcolorbox}
+\end{objetivos}
 
 \section*{Exercícios}
+
+\begin{exercicio}
 
 \subsection*{Exercício 1 --- Fixação}
 Escreva uma função \texttt{int quadrado(int n)} que devolva o quadrado do número recebido como parâmetro. Escreva também o protótipo correspondente, e chame a função a partir de \texttt{main} para exibir o quadrado de um número digitado pelo usuário.
 
 \subsection*{Exercício 2 --- Aplicação}
-Escreva um programa com três funções: \texttt{ler\_notas}, responsável por ler três notas digitadas pelo usuário; \texttt{calcular\_media}, que recebe as três notas e devolve a média entre elas; e \texttt{exibir\_resultado}, que recebe a média e exibe se o aluno foi aprovado (média maior ou igual a 6) ou reprovado. Utilize protótipos para todas as funções antes de \texttt{main}.
+Escreva um programa com três funções: \texttt{ler\_nota}, responsável por ler uma nota digitada pelo usuário e devolvê-la (chame-a três vezes em \texttt{main}); \texttt{calcular\_media}, que recebe as três notas e devolve a média entre elas; e \texttt{exibir\_resultado}, que recebe a média e exibe se o aluno foi aprovado (média maior ou igual a 6) ou reprovado. Utilize protótipos para todas as funções antes de \texttt{main}.
 
 \subsection*{Exercício 3 --- Desafio}
 Considere o programa a seguir:
@@ -1456,6 +1461,8 @@ int main(void) {
 \end{lstlisting}
 
 Qual será a saída exibida por esse programa? Explique, com base no que aprendemos sobre passagem por valor, por que a função \texttt{trocar} \textbf{não consegue} trocar de fato os valores de \texttt{x} e \texttt{y} em \texttt{main}. O que você imagina que precisaria mudar, na declaração da função e em sua chamada, para que essa troca realmente funcionasse?
+
+\end{exercicio}
 
 
 %----------------------------------------
@@ -1572,6 +1579,7 @@ for (int i = 0; i < 5; i++) {
 \end{lstlisting}
 
 \section{Vetores e Funções}
+\label{sec:vetores-funcoes}
 
 Assim como variáveis, vetores podem ser passados como argumentos para funções. A sintaxe do parâmetro, no entanto, é um pouco diferente:
 
@@ -1607,14 +1615,14 @@ Isso pode parecer contraditório com o que aprendemos sobre passagem por valor �
 \section{Vetores e Ponteiros}
 \label{sec:vetores-ponteiros}
 
-Chegamos a uma das conexões mais importantes da linguagem C. O nome de um vetor, usado sozinho em uma expressão, é tratado pelo compilador como o \textbf{endereço do seu primeiro elemento}. Ou seja, as três expressões abaixo são equivalentes:
+Chegamos a uma das conexões mais importantes da linguagem C. O nome de um vetor, usado sozinho em uma expressão, é tratado pelo compilador como o \textbf{endereço do seu primeiro elemento}. Ou seja, as duas expressões abaixo são equivalentes:
 
 \begin{lstlisting}
 notas          // endereco do primeiro elemento
 &notas[0]      // endereco do primeiro elemento, explicitamente
 \end{lstlisting}
 
-É exatamente por isso que, ao passar um vetor para uma função, você está — na prática — passando apenas um \textbf{endereço de memória}, e não uma cópia de todos os elementos. É esse mecanismo que explica o comportamento observado na Seção~5.5: a função recebe o endereço de onde o vetor \textit{de verdade} está armazenado, e por isso qualquer alteração feita através desse endereço afeta o vetor original.
+É exatamente por isso que, ao passar um vetor para uma função, você está — na prática — passando apenas um \textbf{endereço de memória}, e não uma cópia de todos os elementos. É esse mecanismo que explica o comportamento observado na Seção~\ref{sec:vetores-funcoes}: a função recebe o endereço de onde o vetor \textit{de verdade} está armazenado, e por isso qualquer alteração feita através desse endereço afeta o vetor original.
 
 C também permite acessar os elementos de um vetor usando \textbf{aritmética de ponteiros}: somar um número ao endereço do vetor avança essa quantidade de \textit{elementos} (não de bytes) dentro dele. Isso significa que a notação familiar \texttt{notas[i]} é, internamente, apenas uma forma mais legível de escrever \texttt{*(notas + i)}:
 
@@ -1668,7 +1676,7 @@ Reunimos aqui, de forma resumida, as armadilhas mais frequentes ao trabalhar com
 \section*{Resumo do Capítulo}
 Neste capítulo, demos o primeiro passo da Parte II ao aprender a trabalhar com coleções de dados por meio de vetores. Vimos como declarar, inicializar, acessar e percorrer vetores, como passá-los para funções — e por que, diferente de variáveis comuns, alterações feitas dentro da função afetam o vetor original. Também introduzimos, de forma intuitiva, a relação entre vetores e endereços de memória, uma ideia que será retomada com profundidade na Parte III. No próximo capítulo, vamos aplicar tudo isso a um caso particular extremamente importante: vetores de caracteres, usados para representar texto.
 
-\begin{tcolorbox}[title={Ao final deste capítulo, você deve ser capaz de:}]
+\begin{objetivos}
 \begin{itemize}
     \item Explicar o que é um vetor e por que seus índices começam em \texttt{0}.
     \item Declarar e inicializar vetores, total ou parcialmente.
@@ -1678,9 +1686,11 @@ Neste capítulo, demos o primeiro passo da Parte II ao aprender a trabalhar com 
     \item Explicar por que alterações em um vetor dentro de uma função afetam o vetor original.
     \item Implementar as operações clássicas sobre vetores: soma, média, busca, maior/menor elemento, contagem, inversão e cópia.
 \end{itemize}
-\end{tcolorbox}
+\end{objetivos}
 
 \section*{Exercícios}
+
+\begin{exercicio}
 
 \subsection*{Exercício 1 --- Fixação}
 Declare um vetor de 10 inteiros, preencha-o lendo valores digitados pelo usuário e exiba, em seguida, todos os elementos em ordem inversa (do último para o primeiro).
@@ -1711,6 +1721,8 @@ que inverta a ordem dos elementos de um vetor \textbf{no próprio vetor}, ou sej
 
 \textbf{Dica:} utilize dois índices: um começando no início do vetor e outro no final. A cada repetição, troque os elementos apontados pelos índices e faça-os se aproximarem até que se encontrem.
 
+\end{exercicio}
+
 
 \chapter{Strings}
 No capítulo anterior, aprendemos a trabalhar com vetores: sequências de elementos do mesmo tipo, armazenados de forma contígua na memória. Neste capítulo, vamos aplicar exatamente esses mesmos conceitos a um caso particular extremamente importante — a representação de texto.
@@ -1718,6 +1730,7 @@ No capítulo anterior, aprendemos a trabalhar com vetores: sequências de elemen
 É fundamental deixar uma ideia clara desde o início: \textbf{C não possui um tipo primitivo chamado \texttt{string}}. Diferente de Python, Java ou JavaScript, onde texto é um tipo de dado nativo com seus próprios operadores e métodos, em C uma string é simplesmente um \textbf{vetor de \texttt{char}}, seguindo uma convenção específica que vamos entender neste capítulo. Tudo o que aprendemos sobre vetores — declaração, índices, percurso com \texttt{for}, passagem para funções — se aplica diretamente aqui.
 
 \section{O que é uma String em C?}
+\label{sec:string-conceito}
 
 Uma string, em C, é um vetor de caracteres (\texttt{char}) que termina com um caractere especial, chamado \textbf{terminador nulo}, representado por \texttt{'\textbackslash 0'}. Esse terminador marca onde o texto 'real' acaba dentro do vetor.
 
@@ -1741,7 +1754,7 @@ Essa linha é, na prática, equivalente a inicializar manualmente um vetor de \t
 char nome[] = {'R', 'a', 'f', 'a', 'e', 'l', '\0'};
 \end{lstlisting}
 
-Note que o vetor \texttt{nome} tem, na verdade, \textbf{7 posições}, e não 6 — a string literal \texttt{"Rafael"} inclui automaticamente o \texttt{'\textbackslash 0'} ao final, ainda que ele não apareça explicitamente entre as aspas. Esquecer desse caractere extra é uma fonte comum de erros ao reservar espaço manualmente para strings, como veremos na Seção~6.8.
+Note que o vetor \texttt{nome} tem, na verdade, \textbf{7 posições}, e não 6 — a string literal \texttt{"Rafael"} inclui automaticamente o \texttt{'\textbackslash 0'} ao final, ainda que ele não apareça explicitamente entre as aspas. Esquecer desse caractere extra é uma fonte comum de erros ao reservar espaço manualmente para strings, como veremos na Seção~\ref{sec:strings-erros}.
 
 \section{O Caractere \texttt{'\textbackslash 0'}}
 
@@ -1758,7 +1771,7 @@ char fim = '\0';     // o terminador nulo, usado para marcar o fim de uma string
 Visualmente parecidos, esses dois caracteres têm significados completamente diferentes. Usar \texttt{'0'} onde deveria estar \texttt{'\textbackslash 0'} é um erro sutil: o compilador não vai reclamar, mas funções que dependem do terminador nulo para saber onde parar (como \texttt{printf} com \texttt{\%s}) vão continuar lendo memória além do que você pretendia.
 \end{errocomum}
 
-Uma consequência direta disso: o \textbf{tamanho do vetor} que armazena uma string quase sempre precisa ser \textbf{maior} do que o número de caracteres "visíveis" do texto, para acomodar também o \texttt{'\textbackslash 0'}. Um vetor de 20 posições, como o declarado na Seção 6.1, pode armazenar textos de até 19 caracteres — a vigésima posição precisa sobrar para o terminador.
+Uma consequência direta disso: o \textbf{tamanho do vetor} que armazena uma string quase sempre precisa ser \textbf{maior} do que o número de caracteres "visíveis" do texto, para acomodar também o \texttt{'\textbackslash 0'}. Um vetor de 20 posições, como o declarado na Seção~\ref{sec:string-conceito}, pode armazenar textos de até 19 caracteres — a vigésima posição precisa sobrar para o terminador.
 
 \section{Entrada e Saída de Strings}
 
@@ -1776,7 +1789,7 @@ char nome[20];
 scanf("%s", nome);
 \end{lstlisting}
 
-Note que, diferente do que fizemos com \texttt{int} e \texttt{float} no Capítulo 2, \textbf{não usamos o \texttt{\&} antes de \texttt{nome}}. Isso acontece porque, como vimos na Seção~5.6, o nome de um vetor já representa o endereço do seu primeiro elemento — e é exatamente esse endereço que \texttt{scanf} precisa receber.
+Note que, diferente do que fizemos com \texttt{int} e \texttt{float} no Capítulo 2, \textbf{não usamos o \texttt{\&} antes de \texttt{nome}}. Isso acontece porque, como vimos na Seção~\ref{sec:vetores-ponteiros}, o nome de um vetor já representa o endereço do seu primeiro elemento — e é exatamente esse endereço que \texttt{scanf} precisa receber.
 
 O \texttt{scanf} com \texttt{\%s}, no entanto, tem uma limitação importante: ele interrompe a leitura no primeiro espaço em branco, o que o torna inadequado para ler frases inteiras (como "Rafael Silva"). Além disso, ele não tem nenhuma noção do tamanho do vetor de destino, o que abre espaço para o vetor receber mais caracteres do que ele comporta.
 
@@ -1805,7 +1818,7 @@ C não tem operadores nativos para trabalhar com strings — não é possível, 
 #include <string.h>
 
 char nome[20] = "Rafael";
-printf("%d\n", strlen(nome)); // exibe 6
+printf("%zu\n", strlen(nome)); // exibe 6
 
 char copia[20];
 strcpy(copia, nome);
@@ -1822,6 +1835,8 @@ O objetivo aqui não é decorar essa lista, e sim entender \textbf{o que cada fu
 Assim como vetores em geral, strings são passadas para funções por meio do endereço de seu primeiro caractere — um parâmetro do tipo \texttt{char *} (que estudaremos formalmente na Parte III, mas que já podemos usar de forma intuitiva agora):
 
 \begin{lstlisting}
+#include <ctype.h> // necessario para toupper
+
 void exibir_maiusculo(char texto[]) {
     for (int i = 0; texto[i] != '\0'; i++) {
         printf("%c", toupper(texto[i]));
@@ -1874,6 +1889,7 @@ int meu_strlen(const char texto[]) {
 Implementar essas funções "do zero" — mesmo sabendo que versões prontas existem em \texttt{<string.h>} — é um exercício particularmente valioso para consolidar a ideia de que uma string não é uma "caixa mágica de texto", mas sim um vetor comum, percorrido com a mesma lógica que já dominamos no Capítulo 5.
 
 \section{Erros Comuns}
+\label{sec:strings-erros}
 
 \begin{itemize}
     \item Esquecer de reservar espaço para o \texttt{'\textbackslash 0'} ao dimensionar um vetor de \texttt{char} manualmente.
@@ -1887,7 +1903,7 @@ Implementar essas funções "do zero" — mesmo sabendo que versões prontas exi
 \section*{Resumo do Capítulo}
 Neste capítulo, entendemos que strings em C não são um tipo à parte, mas sim uma aplicação direta do que aprendemos sobre vetores no capítulo anterior: um vetor de \texttt{char}, terminado pelo caractere especial \texttt{'\textbackslash 0'}. Vimos como inicializar, ler e exibir strings, conhecemos as principais funções de \texttt{<string.h>} e, mais importante, aprendemos a percorrer uma string manualmente — uma habilidade que reforça a compreensão de que texto, em C, é simplesmente memória organizada de uma forma específica. No próximo capítulo, damos um passo além na organização de dados, estendendo a ideia de vetor para mais de uma dimensão.
 
-\begin{tcolorbox}[title={Ao final deste capítulo, você deve ser capaz de:}]
+\begin{objetivos}
 \begin{itemize}
     \item Explicar por que uma string em C é, na verdade, um vetor de \texttt{char}.
     \item Explicar o papel do caractere \texttt{'\textbackslash 0'} na representação de strings.
@@ -1897,9 +1913,11 @@ Neste capítulo, entendemos que strings em C não são um tipo à parte, mas sim
     \item Percorrer uma string manualmente usando seu terminador nulo como condição de parada.
     \item Reconhecer e evitar os erros mais comuns ao manipular strings.
 \end{itemize}
-\end{tcolorbox}
+\end{objetivos}
 
 \section*{Exercícios}
+
+\begin{exercicio}
 
 \subsection*{Exercício 1 --- Fixação}
 Declare uma string, leia um nome digitado pelo usuário com \texttt{scanf} e exiba, em seguida, quantos caracteres ele possui, usando \texttt{strlen}.
@@ -1915,6 +1933,8 @@ Escreva um programa que leia uma frase (usando \texttt{fgets}) e, usando funçõ
 
 \subsection*{Exercício 5 --- Desafio}
 Sem usar \texttt{strcpy}, implemente uma função \texttt{void minha\_strcpy(char destino[], const char origem[])} que copie o conteúdo de \texttt{origem} para \texttt{destino}, caractere por caractere, garantindo que o terminador nulo também seja copiado corretamente.
+
+\end{exercicio}
 
 
 \chapter{Arrays Multidimensionais}
@@ -1980,7 +2000,7 @@ int matriz[][3] = {   // numero de linhas deduzido: 2
 };
 \end{lstlisting}
 
-Matrizes com o mesmo número de linhas e colunas são chamadas de \textbf{matrizes quadradas}, e aparecem com frequência em problemas envolvendo tabuleiros ou transformações matemáticas, como veremos na Seção~7.7.
+Matrizes com o mesmo número de linhas e colunas são chamadas de \textbf{matrizes quadradas}, e aparecem com frequência em problemas envolvendo tabuleiros ou transformações matemáticas, como veremos na Seção~\ref{sec:matrizes-operacoes}.
 
 \section{Acesso aos Elementos}
 
@@ -1996,9 +2016,10 @@ printf("%d\n", matriz[1][2]); // acessa a linha 1, coluna 2: exibe 6
 matriz[0][0] = 100;            // altera a linha 0, coluna 0
 \end{lstlisting}
 
-A ordem dos índices importa: \texttt{matriz[1][2]} e \texttt{matriz[2][1]} referem-se a posições diferentes (e a segunda sequer seria válida na matriz do exemplo acima, que só tem 3 colunas). Um erro comum é inverter mentalmente essa ordem, especialmente ao traduzir um problema descrito em termos de "linha X, coluna Y" para código — vamos retomar esse cuidado na Seção~7.9.
+A ordem dos índices importa: \texttt{matriz[1][2]} e \texttt{matriz[2][1]} referem-se a posições diferentes (e a segunda sequer seria válida na matriz do exemplo acima, que só tem 3 colunas). Um erro comum é inverter mentalmente essa ordem, especialmente ao traduzir um problema descrito em termos de "linha X, coluna Y" para código — vamos retomar esse cuidado na Seção~\ref{sec:matrizes-erros}.
 
 \section{Percorrendo Matrizes}
+\label{sec:matrizes-percorrendo}
 
 Para visitar todos os elementos de uma matriz, usamos \textbf{laços aninhados} — um laço externo percorrendo as linhas, e um laço interno percorrendo as colunas de cada linha, retomando diretamente o que estudamos no Capítulo 3:
 
@@ -2014,6 +2035,7 @@ for (int i = 0; i < linhas; i++) {
 É importante internalizar a ordem de execução desse padrão: para cada valor de \texttt{i} (cada linha), o laço interno percorre \textbf{todas} as colunas antes que \texttt{i} avance para a linha seguinte. Esse é exatamente o mesmo comportamento que já discutimos ao apresentar laços aninhados no Capítulo 3 — a diferença agora é que temos uma estrutura de dados real, a matriz, para dar sentido a essa dupla repetição.
 
 \section{Matrizes e Memória}
+\label{sec:matrizes-memoria}
 
 Apesar de pensarmos em uma matriz como uma grade bidimensional, a memória do computador é, fisicamente, \textbf{unidimensional} — um longo corredor de bytes, um após o outro. Isso significa que, por trás da notação \texttt{matriz[i][j]}, o compilador precisa converter dois índices em um único deslocamento dentro desse corredor contínuo de memória.
 
@@ -2031,11 +2053,12 @@ Em C, essa conversão segue a chamada \textbf{ordem row-major} (ordem por linhas
 \textit{matriz 2×3 armazenada como um bloco contínuo de 6 elementos}
 \end{center}
 
-Essa organização explica por que, ao declarar um parâmetro de matriz em uma função (Seção~7.6), o número de \textbf{colunas} precisa ser sempre conhecido: é essa informação que permite ao compilador calcular corretamente o deslocamento até qualquer elemento \texttt{matriz[i][j]}, mesmo enxergando a memória apenas como uma sequência contínua de valores.
+Essa organização explica por que, ao declarar um parâmetro de matriz em uma função (Seção~\ref{sec:matrizes-funcoes}), o número de \textbf{colunas} precisa ser sempre conhecido: é essa informação que permite ao compilador calcular corretamente o deslocamento até qualquer elemento \texttt{matriz[i][j]}, mesmo enxergando a memória apenas como uma sequência contínua de valores.
 
 Não vamos nos aprofundar, por ora, em como alocar matrizes \textbf{dinamicamente} (isto é, com dimensões definidas apenas durante a execução do programa) — esse tema pertence à Parte III, quando já tivermos discutido ponteiros e alocação de memória com a profundidade necessária.
 
 \section{Matrizes e Funções}
+\label{sec:matrizes-funcoes}
 
 Assim como vetores unidimensionais, matrizes são passadas para funções por meio do endereço do seu primeiro elemento — e, também aqui, o compilador não carrega consigo as dimensões da matriz automaticamente. A diferença em relação a vetores simples é que, para matrizes, \textbf{a segunda dimensão em diante precisa ser informada diretamente na assinatura da função}:
 
@@ -2050,9 +2073,10 @@ void imprime_matriz(int matriz[][3], int linhas) {
 }
 \end{lstlisting}
 
-Isso acontece exatamente pelo motivo discutido na Seção~7.5: para calcular o endereço de \texttt{matriz[i][j]} dentro do bloco contínuo de memória, o compilador precisa saber quantas colunas cada linha possui — sem essa informação, seria impossível determinar onde uma linha termina e a próxima começa. O número de \textbf{linhas}, por outro lado, pode ser passado normalmente como um parâmetro separado, assim como fazíamos com o tamanho de um vetor unidimensional no Capítulo 5.
+Isso acontece exatamente pelo motivo discutido na Seção~\ref{sec:matrizes-memoria}: para calcular o endereço de \texttt{matriz[i][j]} dentro do bloco contínuo de memória, o compilador precisa saber quantas colunas cada linha possui — sem essa informação, seria impossível determinar onde uma linha termina e a próxima começa. O número de \textbf{linhas}, por outro lado, pode ser passado normalmente como um parâmetro separado, assim como fazíamos com o tamanho de um vetor unidimensional no Capítulo 5.
 
 \section{Operações Clássicas}
+\label{sec:matrizes-operacoes}
 
 Assim como fizemos para vetores, vale a pena conhecer bem um pequeno conjunto de operações que aparecem repetidamente em problemas envolvendo matrizes:
 
@@ -2065,7 +2089,7 @@ Assim como fizemos para vetores, vale a pena conhecer bem um pequeno conjunto de
     \item \textbf{Soma de linhas/colunas}: acumular, separadamente, a soma de cada linha (ou de cada coluna) da matriz.
 \end{itemize}
 
-Como você deve ter notado, todas essas operações reaproveitam diretamente o padrão de laços aninhados apresentado na Seção~7.4 — a principal diferença entre elas está em \textbf{quais índices variam} e \textbf{o que é feito com \texttt{matriz[i][j]}} a cada repetição.
+Como você deve ter notado, todas essas operações reaproveitam diretamente o padrão de laços aninhados apresentado na Seção~\ref{sec:matrizes-percorrendo} — a principal diferença entre elas está em \textbf{quais índices variam} e \textbf{o que é feito com \texttt{matriz[i][j]}} a cada repetição.
 
 \section{Matrizes como Aplicações}
 
@@ -2081,6 +2105,7 @@ Embora seja comum apresentar matrizes por meio de operações matemáticas, sua 
 Reconhecer esses padrões é útil não apenas para resolver exercícios, mas para identificar, em problemas futuros, quando uma matriz é a estrutura de dados mais natural para representar a informação em questão.
 
 \section{Erros Comuns}
+\label{sec:matrizes-erros}
 
 \begin{itemize}
     \item Confundir linha e coluna ao acessar um elemento, escrevendo \texttt{matriz[coluna][linha]} em vez de \texttt{matriz[linha][coluna]}.
@@ -2094,7 +2119,7 @@ Reconhecer esses padrões é útil não apenas para resolver exercícios, mas pa
 \section*{Resumo do Capítulo}
 Neste capítulo, encerramos a Parte II estendendo a ideia de vetor para mais de uma dimensão. Vimos que uma matriz pode ser entendida, de forma direta, como um vetor de vetores, organizado em linhas e colunas. Aprendemos a declarar, inicializar, acessar e percorrer matrizes com laços aninhados, entendemos como elas são efetivamente armazenadas na memória (de forma contígua, em ordem por linhas) e como passá-las corretamente para funções. Terminamos vendo que uma matriz é, acima de tudo, uma ferramenta de organização de dados, aplicável a problemas que vão muito além do cálculo puramente matemático. A partir daqui, com vetores, strings e matrizes bem consolidados, estamos prontos para a Parte III da apostila, que vai revisitar tudo o que vimos sob uma nova perspectiva: \textit{onde exatamente esses dados estão na memória, e como podemos manipulá-los diretamente através de seus endereços?}
 
-\begin{tcolorbox}[title={Ao final deste capítulo, você deve ser capaz de:}]
+\begin{objetivos}
 \begin{itemize}
     \item Explicar o que é uma matriz e sua relação com vetores de vetores.
     \item Declarar e inicializar matrizes, total ou parcialmente.
@@ -2105,9 +2130,11 @@ Neste capítulo, encerramos a Parte II estendendo a ideia de vetor para mais de 
     \item Implementar operações clássicas sobre matrizes: soma, transposição, diagonal principal, maior elemento e soma de linhas/colunas.
     \item Reconhecer situações do mundo real que podem ser representadas por uma matriz.
 \end{itemize}
-\end{tcolorbox}
+\end{objetivos}
 
 \section*{Exercícios}
+
+\begin{exercicio}
 
 \subsection*{Exercício 1 --- Fixação}
 Declare uma matriz \texttt{3x3}, preencha-a lendo valores digitados pelo usuário e exiba-a formatada em linhas e colunas, como uma tabela.
@@ -2123,6 +2150,8 @@ Implemente o jogo da velha para dois jogadores no terminal: represente o tabulei
 
 \subsection*{Exercício 5 --- Desafio}
 Escreva um programa que represente uma imagem simplificada em escala de cinza como uma matriz de inteiros (valores de \texttt{0} a \texttt{255}). Implemente uma função que "espelhe" a imagem horizontalmente (invertendo a ordem dos elementos em cada linha) e outra que calcule o valor médio de intensidade de toda a imagem.
+
+\end{exercicio}
 %========================================
 
 \part{Gerenciamento de Memória}
@@ -2138,11 +2167,11 @@ int *p = &x;
 
 
 % caixa
-\begin{tcolorbox}[title=Importante]
+\begin{importante}
 
 Nunca utilize um ponteiro sem inicializá-lo.
 
-\end{tcolorbox}
+\end{importante}
 
 
 \chapter{Organização da Memória}
@@ -2264,7 +2293,7 @@ Para isso, o Unicode abandona a ideia de "um byte = um caractere". Em vez disso,
 'A' & U+0041 \\
 'ç' & U+00E7 \\
 '\faYenSign' & U+00A5 \\
-'\faRocket' & U+1F600 \\
+'\faSmile' & U+1F600 \\
 \hline
 \end{tabular}
 }
@@ -2286,7 +2315,7 @@ O \textbf{UTF-8} é, hoje, a codificação Unicode mais usada na internet e em s
 \hline
 U+0000 a U+007F & 1 byte & 'A' \\
 U+0080 a U+07FF & 2 bytes & 'ç' \\
-U+0800 a U+FFFF & 3 bytes & 'あ' \\
+U+0800 a U+FFFF & 3 bytes & '\IfFontExistsTF{MS Gothic}{{\fontspec{MS Gothic}あ}}{U+3042}' \\
 U+10000 a U+10FFFF & 4 bytes & '[GRINNING FACE]' (U+1F600) \\
 \hline
 \end{tabular}
@@ -2312,7 +2341,7 @@ Isso quebra uma suposição implícita que carregamos, sem perceber, desde o Cap
 Assumir que \texttt{strlen} conta caracteres, quando na verdade ela conta bytes:
 \begin{lstlisting}
 char cidade[] = "São Paulo";
-printf("%d\n", strlen(cidade)); // NAO devolve 9!
+printf("%zu\n", strlen(cidade)); // NAO devolve 9!
 \end{lstlisting}
 Como o "ã" ocupa 2 bytes em UTF-8, \texttt{strlen} devolve um valor maior do que o número de caracteres visíveis na tela. Isso não é um bug de \texttt{strlen} — ela está fazendo exatamente o que promete (contar bytes até o \texttt{'\textbackslash 0'}). O erro está em esperar dela algo que ela nunca prometeu: contar caracteres em um sentido "humano".
 \end{errocomum}
@@ -2392,10 +2421,7 @@ Se este capítulo despertou seu interesse, os capítulos de \textit{strings} e \
 
 
 
-\chapter*{...}
-
-
-\end{document}
+% \chapter*{...}
 
 %========================================
 
@@ -2408,3 +2434,5 @@ Se este capítulo despertou seu interesse, os capítulos de \textit{strings} e \
 \chapter{Erros Clássicos em C}
 
 \chapter{Questões Comentadas}
+
+\end{document}

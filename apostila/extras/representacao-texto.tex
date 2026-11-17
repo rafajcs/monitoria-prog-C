@@ -1,0 +1,183 @@
+\chapter*{Representação de Texto: do ASCII ao Unicode}
+\addcontentsline{toc}{chapter}{Representação de Texto: do ASCII ao Unicode}
+
+No Capítulo 6, tratamos strings da forma como o dia a dia da programação em C exige: um vetor de \texttt{char} terminado em \texttt{'\textbackslash 0'}, percorrido caractere a caractere. Essa definição é suficiente para praticamente tudo que você vai programar durante o curso. Mas ela também esconde, deliberadamente, uma pergunta incômoda: \textbf{o que exatamente é um "caractere"?}
+
+Este capítulo assume esse convite. Vamos percorrer o caminho histórico e técnico que vai do ASCII —- um esquema simples, pensado para o inglês e para teleimpressoras dos anos 1960 —- até o Unicode, o padrão que hoje tenta representar, em um único sistema, praticamente toda a escrita humana. No caminho, vamos descobrir que a intuição de "um caractere é um byte", que funciona bem o suficiente para não atrapalhar os primeiros capítulos, é uma simplificação que deixa de se sustentar assim que você sai do inglês.
+
+\section*{Por que representar texto?}
+
+Um computador, no fundo, só manipula números. Toda vez que você vê a letra \texttt{'A'} na tela, o que existe de fato, na memória, é um número e é uma \textbf{convenção}, não uma lei física, que decide que esse número específico deve ser desenhado na tela como a letra "A".
+
+Essa convenção precisa ser compartilhada. Se o seu programa grava o número 65 esperando que ele signifique "A", e outro programa lê esse mesmo número esperando que ele signifique outra coisa, o resultado é um arquivo de texto ilegível, cheio de símbolos sem sentido —-- um problema historicamente conhecido como \textit{mojibake}. A necessidade de um padrão comum de representação de texto não é um detalhe acadêmico: é o que torna possível que um e-mail escrito no Brasil seja lido corretamente no Japão, ou que um código-fonte compartilhado no GitHub compile igualmente em qualquer parte do mundo.
+
+É essa necessidade que motiva toda a história que vamos contar neste capítulo.
+
+\section*{ASCII e a representação de caracteres}
+
+O \textbf{ASCII} (\textit{American Standard Code for Information Interchange}), padronizado em 1963, foi uma das primeiras tentativas amplamente adotadas de resolver esse problema. Sua proposta era simples: usar \textbf{7 bits} para representar cada caractere, o que permite codificar até $2^7 = 128$ símbolos diferentes — suficiente para as letras maiúsculas e minúsculas do alfabeto inglês, os dez dígitos, sinais de pontuação e alguns caracteres de controle (como o próprio \texttt{'\textbackslash 0'}, o \texttt{'\textbackslash n'} de nova linha, e o \texttt{'\textbackslash t'} de tabulação).
+
+\begin{center}
+\texttt{
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Caractere} & \textbf{Decimal} & \textbf{Binário} \\
+\hline
+'A' & 65 & 01000001 \\
+'a' & 97 & 01100001 \\
+'0' & 48 & 00110000 \\
+'\textbackslash n' & 10 & 00001010 \\
+'\textbackslash 0' & 0 & 00000000 \\
+\hline
+\end{tabular}
+}
+\end{center}
+
+É exatamente essa tabela que sustenta a linha \texttt{char letra = 'A';} do Capítulo 2: internamente, \texttt{letra} guarda o número \texttt{65}, e é apenas por convenção — reforçada pelo especificador \texttt{\%c} de \texttt{printf} — que esse número é exibido como a letra "A" na tela.
+
+Como C reserva, no mínimo, 8 bits (1 byte) para um \texttt{char}, sobra sempre 1 bit não utilizado pelo ASCII original. Diferentes fabricantes de computadores aproveitaram esse bit extra para criar suas próprias extensões — como o \textbf{Latin-1} (ISO 8859-1), que usa os 256 valores possíveis de um byte para acomodar caracteres acentuados comuns em línguas europeias, como o português. O problema é que essas extensões não eram compatíveis entre si: o mesmo número podia representar um "ç" em uma extensão e um símbolo completamente diferente em outra — e é exatamente esse cenário fragmentado que preparou o terreno para o Unicode.
+
+\section*{Unicode e \textit{code points}}
+
+O \textbf{Unicode} nasceu com um objetivo ambicioso: criar um único padrão capaz de representar, em teoria, todo sistema de escrita já usado pela humanidade — do alfabeto latino aos ideogramas do chinês, passando por hebraico, árabe, cirílico e até emojis.
+
+Para isso, o Unicode abandona a ideia de "um byte = um caractere". Em vez disso, ele associa a cada caractere um número único, chamado \textbf{code point}, geralmente escrito no formato \texttt{U+XXXX} (em hexadecimal). Por exemplo:
+
+\begin{center}
+\texttt{
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Caractere} & \textbf{Code point} \\
+\hline
+'A' & U+0041 \\
+'ç' & U+00E7 \\
+'\faYenSign' & U+00A5 \\
+'\faSmile' & U+1F600 \\
+\hline
+\end{tabular}
+}
+\end{center}
+
+Note que os primeiros 128 \textit{code points} do Unicode (\texttt{U+0000} a \texttt{U+007F}) coincidem, propositalmente, com a tabela ASCII original —-- uma decisão de compatibilidade retroativa que facilita muito a transição de sistemas antigos. Mas o Unicode vai muito além: sua versão mais recente já define mais de 149 mil \textit{code points}, cobrindo dezenas de sistemas de escrita.
+
+É crucial entender que o Unicode, por si só, \textbf{não define como esses números devem ser armazenados em bytes na memória ou em um arquivo}. Um \textit{code point} como \texttt{U+1F600} claramente não cabe em um único byte (que só vai até 255). Essa é a lacuna que as \textbf{codificações} (\textit{encodings}) —-- como UTF-8, que veremos a seguir —-- vêm preencher.
+
+\section*{UTF-8 e codificação de tamanho variável}
+
+O \textbf{UTF-8} é, hoje, a codificação Unicode mais usada na internet e em sistemas operacionais modernos. Sua ideia central é representar cada \textit{code point} usando \textbf{de 1 a 4 bytes}, dependendo do seu valor:
+
+\begin{center}
+\texttt{
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Faixa do code point} & \textbf{Bytes usados} & \textbf{Exemplo} \\
+\hline
+U+0000 a U+007F & 1 byte & 'A' \\
+U+0080 a U+07FF & 2 bytes & 'ç' \\
+U+0800 a U+FFFF & 3 bytes & '\IfFontExistsTF{MS Gothic}{{\fontspec{MS Gothic}あ}}{U+3042}' \\
+U+10000 a U+10FFFF & 4 bytes & '[GRINNING FACE]' (U+1F600) \\
+\hline
+\end{tabular}
+}
+\end{center}
+
+A grande vantagem dessa abordagem é a \textbf{compatibilidade retroativa com ASCII}: qualquer texto composto exclusivamente por caracteres ASCII (os primeiros 128) é, byte a byte, idêntico em UTF-8. É por isso que um programa em C escrito e testado apenas com texto em inglês costuma "funcionar por acaso" mesmo sem qualquer preocupação especial com codificação — até o momento em que um "ç", um "á" ou um emoji entra em cena.
+
+Isso também explica por que o UTF-8 é chamado de codificação de \textbf{tamanho variável}: diferentes caracteres ocupam diferentes quantidades de bytes. Essa característica tem uma consequência direta e importante para quem programa em C, que exploramos na próxima seção.
+
+\section*{Strings em C: bytes versus caracteres}
+
+Lembre-se da definição que fixamos no Capítulo 6: uma string em C é um vetor de \texttt{char}, e cada \texttt{char} ocupa exatamente 1 byte. Quando um arquivo-fonte em C contém uma string literal com acentuação, como \texttt{"Programação"}, salva em UTF-8 (o padrão da grande maioria dos editores modernos), essa string não é composta por 11 \textit{caracteres visuais} e 11 \texttt{char}s correspondentes — ela é composta por 11 caracteres visuais, mas por \textbf{mais} de 11 bytes, porque o "ç" e o "ã" ocupam 2 bytes cada um em UTF-8.
+
+\begin{lstlisting}
+char texto[] = "Programacao"; // sem acentos: 11 bytes + '\0'
+char texto2[] = "Programação"; // com acentos: 13 bytes + '\0' em UTF-8
+\end{lstlisting}
+
+Isso quebra uma suposição implícita que carregamos, sem perceber, desde o Capítulo 6: a de que \texttt{strlen} e um laço \texttt{for} que percorre \texttt{texto[i]} sempre visitam "um caractere por vez". Na presença de UTF-8, \texttt{strlen("Programação")} não devolve 11 — devolve o número de \textbf{bytes}, que é maior. E um laço ingênuo, percorrendo byte a byte, não vai visitar "um caractere de cada vez": vai, ocasionalmente, parar no \textbf{meio} de um caractere multibyte, tratando um pedaço dele como se fosse um caractere completo.
+
+\begin{errocomum}
+Assumir que \texttt{strlen} conta caracteres, quando na verdade ela conta bytes:
+\begin{lstlisting}
+char cidade[] = "São Paulo";
+printf("%zu\n", strlen(cidade)); // NAO devolve 9!
+\end{lstlisting}
+Como o "ã" ocupa 2 bytes em UTF-8, \texttt{strlen} devolve um valor maior do que o número de caracteres visíveis na tela. Isso não é um bug de \texttt{strlen} — ela está fazendo exatamente o que promete (contar bytes até o \texttt{'\textbackslash 0'}). O erro está em esperar dela algo que ela nunca prometeu: contar caracteres em um sentido "humano".
+\end{errocomum}
+
+Essa distinção — bytes versus caracteres — é a raiz de praticamente toda a complexidade que envolve texto internacionalizado em C, e é também o motivo pelo qual a linguagem oferece uma alternativa às strings de \texttt{char} comuns, que veremos a seguir.
+
+\section*{\texttt{wchar\_t} e \textit{wide strings}}
+
+Para lidar com o problema de "um caractere por posição de vetor", C oferece o tipo \texttt{wchar\_t} (definido em \texttt{<wchar.h>}), pensado para representar caracteres "largos" — capazes, em teoria, de acomodar um \textit{code point} inteiro em uma única posição, independentemente do quão grande ele seja.
+
+\begin{lstlisting}
+#include <wchar.h>
+
+wchar_t letra = L'a';
+wchar_t frase[] = L"Programacao";
+\end{lstlisting}
+
+O prefixo \texttt{L} antes de um literal de caractere ou string (\texttt{L'a'}, \texttt{L"..."}) indica ao compilador que ele deve ser tratado como \textit{wide}. Funções específicas — como \texttt{wprintf} no lugar de \texttt{printf}, ou \texttt{wcslen} no lugar de \texttt{strlen} — operam sobre esses tipos largos.
+
+Aqui mora uma armadilha importante, e um dos motivos pelos quais este tema fica reservado para "Para ir além": o \textbf{tamanho de \texttt{wchar\_t} não é definido pelo padrão C, e varia entre sistemas}. No Linux, \texttt{wchar\_t} costuma ter 4 bytes, suficiente para qualquer \textit{code point} Unicode em uma única posição (efetivamente, UTF-32). No Windows, por razões históricas, \texttt{wchar\_t} tem apenas 2 bytes — insuficiente para representar diretamente todo o Unicode, o que obriga o Windows a usar, internamente, uma variação de UTF-16 (que voltaremos a discutir na próxima seção). Um código que assume "1 \texttt{wchar\_t} = 1 caractere, sempre" pode, portanto, funcionar perfeitamente em um sistema e falhar silenciosamente em outro.
+
+\section*{UTF-8 x UTF-16 x UTF-32}
+
+Já vimos o UTF-8 em detalhe. Vale a pena colocar as três codificações Unicode mais comuns lado a lado, para entender os \textit{trade-offs} de cada uma:
+
+\begin{center}
+\texttt{
+\begin{tabular}{|l|c|l|}
+\hline
+\textbf{Codificação} & \textbf{Tamanho por caractere} & \textbf{Onde é comum} \\
+\hline
+UTF-8 & 1 a 4 bytes (variável) & Web, Linux, arquivos-texto, C moderno \\
+UTF-16 & 2 ou 4 bytes (variável) & Windows (\texttt{wchar\_t}), Java, JavaScript \\
+UTF-32 & 4 bytes (fixo) & Processamento interno, \texttt{wchar\_t} no Linux \\
+\hline
+\end{tabular}
+}
+\end{center}
+
+O UTF-32 é o mais simples de raciocinar: como todo \textit{code point} ocupa exatamente 4 bytes, "acessar o caractere \texttt{i}" é uma operação de custo constante — basta pular \texttt{i * 4} bytes. O preço dessa simplicidade é o desperdício de espaço: um texto inteiramente em ASCII, que ocuparia 1 byte por caractere em UTF-8, ocupa 4 vezes mais espaço em UTF-32.
+
+O UTF-16, adotado por sistemas mais antigos como o Windows e por linguagens como Java, tenta um meio-termo: a maioria dos caracteres do "plano básico" do Unicode cabe em 2 bytes, mas caracteres além disso (como muitos emojis) precisam de um mecanismo especial, chamado \textit{surrogate pair}, que combina dois valores de 2 bytes para representar um único \textit{code point} — reintroduzindo, por outra via, o mesmo problema de tamanho variável que o UTF-32 tentava evitar.
+
+O UTF-8 se tornou o padrão dominante na web e em sistemas Unix/Linux justamente por equilibrar bem esses fatores: é compacto para texto majoritariamente em inglês (o caso mais comum globalmente em protocolos e formatos de arquivo), compatível byte a byte com ASCII, e não depende de decidir a \textit{ordem dos bytes} (\textit{endianness}) — um problema real que afeta tanto UTF-16 quanto UTF-32 ao trocar dados entre sistemas diferentes.
+
+\section*{O que realmente significa "tamanho de uma string"?}
+
+Depois de todo esse percurso, vale reunir, em um só lugar, os diferentes sentidos possíveis da pergunta "qual é o tamanho desta string?" — porque, como vimos, a resposta depende inteiramente do que você está de fato medindo:
+
+\begin{itemize}
+    \item \textbf{Bytes}: quantos \texttt{char} o vetor ocupa, sem contar \texttt{'\textbackslash 0'}. É o que \texttt{strlen} devolve, e é o valor relevante para decidir se um buffer é grande o suficiente para receber a string.
+    \item \textbf{Code points}: quantos caracteres Unicode distintos existem no texto. É o valor que, intuitivamente, esperamos como "quantidade de letras" — mas que exige percorrer a string \textit{decodificando} o UTF-8 corretamente, e não apenas contando bytes.
+    \item \textbf{Clusters de grafemas}: o que um usuário humano perceberia como "um único caractere na tela". Alguns símbolos visuais — como um emoji seguido de um modificador de tom de pele, ou uma letra seguida de um acento combinante — são compostos por \textbf{múltiplos} \textit{code points}, mas aparecem como uma única unidade visual. Esse é o nível mais complexo, e normalmente delegado a bibliotecas especializadas (como a ICU), e não implementado à mão.
+\end{itemize}
+
+Um mesmo texto pode, portanto, ter três respostas diferentes e igualmente "corretas" para "quantos caracteres ele tem", dependendo de qual dessas três definições você está usando. A maior parte dos bugs de internacionalização em software nasce, precisamente, de confundir esses três níveis — geralmente assumindo, sem perceber, que "bytes" e "caracteres visuais" são a mesma coisa, porque em textos puramente em inglês, com ASCII, eles de fato coincidem.
+
+\section*{Considerações de portabilidade em C}
+
+Ao trabalhar com texto internacionalizado em C, alguns cuidados práticos ajudam a evitar boa parte das armadilhas discutidas neste capítulo:
+
+\begin{itemize}
+    \item \textbf{Não assuma que 1 \texttt{char} = 1 caractere visual.} Se seu programa precisa processar corretamente acentos, emojis ou alfabetos não latinos "caractere por caractere", um laço simples sobre um vetor de \texttt{char} não é suficiente — é necessário decodificar o UTF-8 corretamente, ou recorrer a uma biblioteca especializada.
+    \item \textbf{Não assuma um tamanho fixo para \texttt{wchar\_t}.} Como vimos, ele varia entre sistemas (2 bytes no Windows, 4 no Linux), o que compromete a portabilidade de código que dependa desse tamanho específico.
+    \item \textbf{Cuidado com truncamento no meio de um caractere multibyte.} Cortar uma string UTF-8 em um índice de byte arbitrário (por exemplo, ao limitar um campo a "N caracteres" usando apenas \texttt{strncpy}) pode partir um caractere ao meio, produzindo bytes inválidos ao final da string resultante.
+    \item \textbf{Padrões modernos do C} (a partir do C11) introduziram os tipos \texttt{char16\_t} e \texttt{char32\_t} (em \texttt{<uchar.h>}), com tamanhos fixos e bem definidos — 16 e 32 bits, respectivamente — justamente para reduzir a dependência da definição de \texttt{wchar\_t}, que varia por sistema.
+    \item \textbf{Na dúvida, prefira UTF-8} para armazenamento e transmissão de texto (arquivos, redes, bancos de dados), e trate a decodificação para \textit{code points} individuais apenas nos pontos do programa em que isso for genuinamente necessário — em vez de converter o programa inteiro para trabalhar com \texttt{wchar\_t}.
+\end{itemize}
+
+\section*{Conclusão}
+
+Começamos este capítulo com uma pergunta aparentemente ingênua — "o que é um caractere?" — e terminamos vendo que ela esconde três respostas diferentes (byte, \textit{code point}, grafema), uma história de mais de sessenta anos de padronização, e decisões de projeto que ainda hoje diferem entre Windows e Linux.
+
+Nada disso muda o que você aprendeu no Capítulo 6: para a esmagadora maioria dos programas que você vai escrever durante o curso, tratar uma string como um vetor de \texttt{char} terminado em \texttt{'\textbackslash 0'} continua sendo o modelo correto e suficiente. O que muda é a sua compreensão do que está por trás dessa simplificação — e, principalmente, o reconhecimento de quando ela deixa de ser suficiente: no momento em que seu programa precisa lidar, com correção, com texto que vai além do inglês.
+
+Se este capítulo despertou seu interesse, os capítulos de \textit{strings} e \textit{ponteiros} de \textit{Understanding and Using C Pointers} (Reese) são uma continuação natural — especialmente para quem quer entender como bibliotecas de manipulação de UTF-8 são implementadas, byte a byte, em cima da mesma aritmética de ponteiros que estudamos na Parte III.
+
+
+
+% \chapter*{...}

@@ -1,0 +1,216 @@
+\chapter{Arrays Multidimensionais}
+
+No Capítulo 5, aprendemos a organizar uma sequência de valores em um vetor. No Capítulo 6, vimos que uma string nada mais é do que um caso particular de vetor — um vetor de \texttt{char}. Neste capítulo, damos mais um passo natural nessa mesma linha de raciocínio, em vez de introduzir um conceito inteiramente novo:
+
+\begin{quote}
+\textit{Se um vetor é uma sequência de elementos, o que acontece quando cada elemento dessa sequência é, ele próprio, um vetor?}
+\end{quote}
+
+A resposta é uma \textbf{matriz} (ou, de forma mais geral, um \textbf{array multidimensional}): uma estrutura organizada em mais de uma dimensão, útil sempre que os dados que você precisa representar têm, naturalmente, mais de um "eixo" — como linhas e colunas de uma tabela, ou as casas de um tabuleiro.
+
+\section{Conceito de Arrays Multidimensionais}
+
+A forma mais comum de array multidimensional é a \textbf{matriz bidimensional}: um vetor de vetores, organizado em \textbf{linhas} e \textbf{colunas}.
+
+\begin{lstlisting}
+int matriz[3][4];
+\end{lstlisting}
+
+Essa declaração cria uma matriz com 3 linhas e 4 colunas — ou seja, 12 elementos ao todo, todos do tipo \texttt{int}. Assim como em vetores comuns, os índices de linhas e colunas também começam em \texttt{0}: a matriz acima possui linhas válidas de \texttt{0} a \texttt{2}, e colunas válidas de \texttt{0} a \texttt{3}.
+
+\begin{center}
+\texttt{
+\begin{tabular}{c|c|c|c|c}
+ & col 0 & col 1 & col 2 & col 3 \\
+\hline
+lin 0 & [0][0] & [0][1] & [0][2] & [0][3] \\
+lin 1 & [1][0] & [1][1] & [1][2] & [1][3] \\
+lin 2 & [2][0] & [2][1] & [2][2] & [2][3] \\
+\end{tabular}
+}
+\end{center}
+
+Embora tenhamos apresentado o caso bidimensional, o mesmo princípio se estende para três ou mais dimensões (\texttt{int cubo[2][3][4];}, por exemplo) — mas, na grande maioria dos problemas práticos, duas dimensões já são suficientes, e é nelas que vamos focar neste capítulo.
+
+\section{Declaração e Inicialização}
+
+Uma matriz pode ser inicializada no momento da sua declaração, usando listas aninhadas — uma lista externa, representando as linhas, e uma lista interna para cada uma delas, representando as colunas:
+
+\begin{lstlisting}
+int matriz[2][3] = {
+    {1, 2, 3},
+    {4, 5, 6}
+};
+\end{lstlisting}
+
+Assim como em vetores unidimensionais, também é possível fazer uma \textbf{inicialização parcial}, deixando o compilador preencher com \texttt{0} as posições não especificadas:
+
+\begin{lstlisting}
+int matriz[2][3] = {
+    {1, 2},    // matriz[0][2] vira 0
+    {4}        // matriz[1][1] e matriz[1][2] viram 0
+};
+\end{lstlisting}
+
+Uma particularidade da declaração de matrizes: quando inicializamos a matriz na própria declaração, o tamanho da \textbf{primeira} dimensão (o número de linhas) pode ser omitido, pois o compilador consegue deduzi-lo a partir da quantidade de listas internas fornecidas — mas o tamanho da segunda dimensão em diante \textbf{sempre} precisa ser informado explicitamente:
+
+\begin{lstlisting}
+int matriz[][3] = {   // numero de linhas deduzido: 2
+    {1, 2, 3},
+    {4, 5, 6}
+};
+\end{lstlisting}
+
+Matrizes com o mesmo número de linhas e colunas são chamadas de \textbf{matrizes quadradas}, e aparecem com frequência em problemas envolvendo tabuleiros ou transformações matemáticas, como veremos na Seção~\ref{sec:matrizes-operacoes}.
+
+\section{Acesso aos Elementos}
+
+Para acessar um elemento específico de uma matriz, usamos dois índices entre colchetes: o primeiro indicando a linha, o segundo indicando a coluna.
+
+\begin{lstlisting}
+int matriz[2][3] = {
+    {1, 2, 3},
+    {4, 5, 6}
+};
+
+printf("%d\n", matriz[1][2]); // acessa a linha 1, coluna 2: exibe 6
+matriz[0][0] = 100;            // altera a linha 0, coluna 0
+\end{lstlisting}
+
+A ordem dos índices importa: \texttt{matriz[1][2]} e \texttt{matriz[2][1]} referem-se a posições diferentes (e a segunda sequer seria válida na matriz do exemplo acima, que só tem 3 colunas). Um erro comum é inverter mentalmente essa ordem, especialmente ao traduzir um problema descrito em termos de "linha X, coluna Y" para código — vamos retomar esse cuidado na Seção~\ref{sec:matrizes-erros}.
+
+\section{Percorrendo Matrizes}
+\label{sec:matrizes-percorrendo}
+
+Para visitar todos os elementos de uma matriz, usamos \textbf{laços aninhados} — um laço externo percorrendo as linhas, e um laço interno percorrendo as colunas de cada linha, retomando diretamente o que estudamos no Capítulo 3:
+
+\begin{lstlisting}
+for (int i = 0; i < linhas; i++) {
+    for (int j = 0; j < colunas; j++) {
+        printf("%d ", matriz[i][j]);
+    }
+    printf("\n");
+}
+\end{lstlisting}
+
+É importante internalizar a ordem de execução desse padrão: para cada valor de \texttt{i} (cada linha), o laço interno percorre \textbf{todas} as colunas antes que \texttt{i} avance para a linha seguinte. Esse é exatamente o mesmo comportamento que já discutimos ao apresentar laços aninhados no Capítulo 3 — a diferença agora é que temos uma estrutura de dados real, a matriz, para dar sentido a essa dupla repetição.
+
+\section{Matrizes e Memória}
+\label{sec:matrizes-memoria}
+
+Apesar de pensarmos em uma matriz como uma grade bidimensional, a memória do computador é, fisicamente, \textbf{unidimensional} — um longo corredor de bytes, um após o outro. Isso significa que, por trás da notação \texttt{matriz[i][j]}, o compilador precisa converter dois índices em um único deslocamento dentro desse corredor contínuo de memória.
+
+Em C, essa conversão segue a chamada \textbf{ordem row-major} (ordem por linhas): todos os elementos da linha \texttt{0} são armazenados primeiro, seguidos por todos os elementos da linha \texttt{1}, e assim por diante.
+
+\begin{center}
+\texttt{
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+[0][0] & [0][1] & [0][2] & [1][0] & [1][1] & [1][2] \\
+\hline
+\end{tabular}
+}
+\\[2pt]
+\textit{matriz 2×3 armazenada como um bloco contínuo de 6 elementos}
+\end{center}
+
+Essa organização explica por que, ao declarar um parâmetro de matriz em uma função (Seção~\ref{sec:matrizes-funcoes}), o número de \textbf{colunas} precisa ser sempre conhecido: é essa informação que permite ao compilador calcular corretamente o deslocamento até qualquer elemento \texttt{matriz[i][j]}, mesmo enxergando a memória apenas como uma sequência contínua de valores.
+
+Não vamos nos aprofundar, por ora, em como alocar matrizes \textbf{dinamicamente} (isto é, com dimensões definidas apenas durante a execução do programa) — esse tema pertence à Parte III, quando já tivermos discutido ponteiros e alocação de memória com a profundidade necessária.
+
+\section{Matrizes e Funções}
+\label{sec:matrizes-funcoes}
+
+Assim como vetores unidimensionais, matrizes são passadas para funções por meio do endereço do seu primeiro elemento — e, também aqui, o compilador não carrega consigo as dimensões da matriz automaticamente. A diferença em relação a vetores simples é que, para matrizes, \textbf{a segunda dimensão em diante precisa ser informada diretamente na assinatura da função}:
+
+\begin{lstlisting}
+void imprime_matriz(int matriz[][3], int linhas) {
+    for (int i = 0; i < linhas; i++) {
+        for (int j = 0; j < 3; j++) {
+            printf("%d ", matriz[i][j]);
+        }
+        printf("\n");
+    }
+}
+\end{lstlisting}
+
+Isso acontece exatamente pelo motivo discutido na Seção~\ref{sec:matrizes-memoria}: para calcular o endereço de \texttt{matriz[i][j]} dentro do bloco contínuo de memória, o compilador precisa saber quantas colunas cada linha possui — sem essa informação, seria impossível determinar onde uma linha termina e a próxima começa. O número de \textbf{linhas}, por outro lado, pode ser passado normalmente como um parâmetro separado, assim como fazíamos com o tamanho de um vetor unidimensional no Capítulo 5.
+
+\section{Operações Clássicas}
+\label{sec:matrizes-operacoes}
+
+Assim como fizemos para vetores, vale a pena conhecer bem um pequeno conjunto de operações que aparecem repetidamente em problemas envolvendo matrizes:
+
+\begin{itemize}
+    \item \textbf{Soma de matrizes}: percorrer ambas as matrizes com os mesmos índices \texttt{i} e \texttt{j}, somando os elementos correspondentes em uma matriz resultado.
+    \item \textbf{Multiplicação por escalar}: percorrer a matriz multiplicando cada elemento por um valor fixo.
+    \item \textbf{Transposição}: criar uma nova matriz em que a linha \texttt{i} da matriz original se torna a coluna \texttt{i} da nova matriz (ou seja, \texttt{transposta[j][i] = original[i][j]}).
+    \item \textbf{Diagonal principal}: os elementos em que o índice da linha é igual ao da coluna (\texttt{matriz[i][i]}), presentes apenas em matrizes quadradas.
+    \item \textbf{Maior elemento}: percorrer todos os elementos com laços aninhados, guardando o maior valor encontrado até o momento — a mesma lógica usada em vetores, agora com dois índices.
+    \item \textbf{Soma de linhas/colunas}: acumular, separadamente, a soma de cada linha (ou de cada coluna) da matriz.
+\end{itemize}
+
+Como você deve ter notado, todas essas operações reaproveitam diretamente o padrão de laços aninhados apresentado na Seção~\ref{sec:matrizes-percorrendo} — a principal diferença entre elas está em \textbf{quais índices variam} e \textbf{o que é feito com \texttt{matriz[i][j]}} a cada repetição.
+
+\section{Matrizes como Aplicações}
+
+Embora seja comum apresentar matrizes por meio de operações matemáticas, sua utilidade vai muito além disso. Vale a pena ter em mente que uma matriz é, fundamentalmente, apenas \textbf{uma forma de organizar dados em duas dimensões} — o que a torna adequada para representar diversas situações do mundo real:
+
+\begin{itemize}
+    \item Um \textbf{tabuleiro} de jogo (como jogo da velha ou batalha naval), em que cada posição \texttt{matriz[i][j]} representa uma casa.
+    \item Uma \textbf{tabela de notas}, em que cada linha representa um aluno e cada coluna uma avaliação diferente.
+    \item Uma \textbf{imagem simplificada em escala de cinza}, em que cada posição da matriz armazena a intensidade de um pixel.
+    \item Um \textbf{mapa ou grade}, representando, por exemplo, obstáculos e caminhos livres em um pequeno labirinto.
+\end{itemize}
+
+Reconhecer esses padrões é útil não apenas para resolver exercícios, mas para identificar, em problemas futuros, quando uma matriz é a estrutura de dados mais natural para representar a informação em questão.
+
+\section{Erros Comuns}
+\label{sec:matrizes-erros}
+
+\begin{itemize}
+    \item Confundir linha e coluna ao acessar um elemento, escrevendo \texttt{matriz[coluna][linha]} em vez de \texttt{matriz[linha][coluna]}.
+    \item Inverter as dimensões ao declarar a matriz (por exemplo, declarar \texttt{int matriz[4][3]} quando o problema exige 3 linhas e 4 colunas).
+    \item Ultrapassar os limites válidos de linha ou de coluna, de forma semelhante ao que já vimos com vetores no Capítulo 5.
+    \item Assumir que os índices de linha e coluna começam em \texttt{1}, em vez de \texttt{0}.
+    \item Errar a condição de um dos dois laços \texttt{for} (por exemplo, usar o número de linhas como limite do laço que deveria percorrer as colunas).
+    \item Passar o número de colunas incorretamente (ou esquecê-lo) ao declarar uma função que recebe uma matriz como parâmetro.
+\end{itemize}
+
+\section*{Resumo do Capítulo}
+Neste capítulo, encerramos a Parte II estendendo a ideia de vetor para mais de uma dimensão. Vimos que uma matriz pode ser entendida, de forma direta, como um vetor de vetores, organizado em linhas e colunas. Aprendemos a declarar, inicializar, acessar e percorrer matrizes com laços aninhados, entendemos como elas são efetivamente armazenadas na memória (de forma contígua, em ordem por linhas) e como passá-las corretamente para funções. Terminamos vendo que uma matriz é, acima de tudo, uma ferramenta de organização de dados, aplicável a problemas que vão muito além do cálculo puramente matemático. A partir daqui, com vetores, strings e matrizes bem consolidados, estamos prontos para a Parte III da apostila, que vai revisitar tudo o que vimos sob uma nova perspectiva: \textit{onde exatamente esses dados estão na memória, e como podemos manipulá-los diretamente através de seus endereços?}
+
+\begin{objetivos}
+\begin{itemize}
+    \item Explicar o que é uma matriz e sua relação com vetores de vetores.
+    \item Declarar e inicializar matrizes, total ou parcialmente.
+    \item Acessar e alterar elementos de uma matriz usando os índices corretos de linha e coluna.
+    \item Percorrer uma matriz utilizando laços aninhados.
+    \item Explicar como uma matriz bidimensional é armazenada em uma memória fisicamente unidimensional.
+    \item Passar matrizes para funções, informando corretamente o número de colunas.
+    \item Implementar operações clássicas sobre matrizes: soma, transposição, diagonal principal, maior elemento e soma de linhas/colunas.
+    \item Reconhecer situações do mundo real que podem ser representadas por uma matriz.
+\end{itemize}
+\end{objetivos}
+
+\section*{Exercícios}
+
+\begin{exercicio}
+
+\subsection*{Exercício 1 --- Fixação}
+Declare uma matriz \texttt{3x3}, preencha-a lendo valores digitados pelo usuário e exiba-a formatada em linhas e colunas, como uma tabela.
+
+\subsection*{Exercício 2 --- Aplicação}
+Escreva um programa que leia uma matriz \texttt{4x4} de inteiros e calcule, usando funções separadas: (a) a soma de todos os elementos; (b) a soma dos elementos da diagonal principal; (c) o maior elemento da matriz e sua posição (linha e coluna).
+
+\subsection*{Exercício 3 --- Aplicação}
+Escreva uma função \texttt{void transpor(int origem[][3], int destino[][2], int linhas, int colunas)} que receba uma matriz de \texttt{linhas x colunas} e produza sua transposta (\texttt{colunas x linhas}) em \texttt{destino}. Teste com uma matriz \texttt{2x3} de sua escolha.
+
+\subsection*{Exercício 4 --- Integrador}
+Implemente o jogo da velha para dois jogadores no terminal: represente o tabuleiro como uma matriz \texttt{3x3} de \texttt{char}, exiba-o formatado a cada jogada, leia a posição desejada por cada jogador (linha e coluna) e verifique, a cada rodada, se algum jogador venceu ou se houve empate.
+
+\subsection*{Exercício 5 --- Desafio}
+Escreva um programa que represente uma imagem simplificada em escala de cinza como uma matriz de inteiros (valores de \texttt{0} a \texttt{255}). Implemente uma função que "espelhe" a imagem horizontalmente (invertendo a ordem dos elementos em cada linha) e outra que calcule o valor médio de intensidade de toda a imagem.
+
+\end{exercicio}
+%========================================

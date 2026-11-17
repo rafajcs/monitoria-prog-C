@@ -1,0 +1,87 @@
+\documentclass[12pt,a4paper,oneside]{extreport}
+
+\input{preambulo.tex}
+
+%========================TITULO=======================%
+
+\title{\huge Apostila de Preparação para Programação \textbf{C}}
+\author{Rafael Coelho}
+%\date{July 2026}
+
+%=========================Documento============================%
+
+\begin{document}
+\maketitle
+
+%===========================Pré-textual=========================%
+
+\input{pretextual/prefacio.tex}
+\input{pretextual/como-usar.tex}
+
+%=====================Sumário=======================%
+
+\tableofcontents
+\clearpage
+
+\typeout{PAGINA ATUAL = \thepage}
+
+%===============================================%
+
+\part{Fundamentos de C}
+
+\input{capitulos/01-introducao.tex}
+\input{capitulos/02-variaveis-tipos-operadores.tex}
+\input{capitulos/03-controle-fluxo.tex}
+\input{capitulos/04-funcoes.tex}
+
+%========================================
+
+\part{Organização dos Dados}
+
+\input{capitulos/05-vetores.tex}
+\input{capitulos/06-strings.tex}
+\input{capitulos/07-arrays-multidimensionais.tex}
+
+%========================================
+
+\part{Gerenciamento de Memória}
+
+\input{capitulos/08-ponteiros.tex}
+\input{capitulos/09-organizacao-memoria.tex}
+\input{capitulos/10-alocacao-dinamica.tex}
+
+%========================================
+
+\part{Programação Modular}
+
+\input{capitulos/11-structs-enums.tex}
+\input{capitulos/12-modularizacao.tex}
+\input{capitulos/13-estruturas-dados.tex}
+
+%========================================
+
+\part{Tópicos Avançados}
+
+\input{capitulos/14-bit-a-bit.tex}
+\input{capitulos/15-recursao.tex}
+\input{capitulos/16-depuracao.tex}
+
+%========================================
+
+\part{Para ir além}
+
+\input{extras/para-ir-alem-intro.tex}
+\input{extras/17-algoritmos-ordenacao.tex}
+\input{extras/representacao-texto.tex}
+
+%========================================
+
+\appendix
+
+\part{Apêndices}
+
+\input{apendices/01-perguntas-frequentes.tex}
+\input{apendices/02-erros-classicos.tex}
+\input{apendices/03-questoes-comentadas.tex}
+
+\end{document}

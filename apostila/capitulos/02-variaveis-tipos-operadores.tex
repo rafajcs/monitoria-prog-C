@@ -1,0 +1,347 @@
+\chapter{Variáveis, Tipos e Operadores}
+
+Todo programa existe para representar informações e operar sobre elas. Se você já teve contato com Python, provavelmente está acostumado a pensar em uma variável simplesmente como "uma caixa que guarda um valor" — você escreve idade = 20 e pronto, o Python descobre sozinho que aquilo é um número inteiro.
+
+Em C, esse raciocínio precisa ser mais preciso. Antes de guardar qualquer valor, precisamos responder três perguntas:
+
+\begin{itemize}
+    \item Qual é o tipo desse dado?
+    \item Quanto espaço ele ocupa na memória?
+    \item Como esse valor é efetivamente representado, em bits, dentro desse espaço?
+\end{itemize}
+
+Essas perguntas podem parecer burocráticas no início, mas são exatamente o que torna C uma linguagem tão próxima do funcionamento real do computador. Neste capítulo, vamos construir a base para pensar em variáveis não como "caixas mágicas", mas como regiões de memória com um tipo bem definido.
+
+\section{Variáveis e Declaração}
+
+Uma variável é um espaço nomeado na memória do computador, usado para armazenar um valor que pode ser lido e modificado durante a execução do programa. Em C, toda variável precisa ser \textbf{declarada} antes de ser usada — ou seja, você precisa informar ao compilador qual é o tipo dela e qual nome ela vai ter.
+
+\begin{lstlisting}
+int idade;
+idade = 20;
+
+int ano = 2026;
+\end{lstlisting}
+
+Note que existem duas ações diferentes acontecendo:
+
+\begin{itemize}
+
+    \item \textbf{Declaração:} \texttt{int idade;} — aqui você está dizendo ao compilador "reserve espaço na memória para um número inteiro chamado idade".
+    \item \textbf{Atribuição:} \texttt{idade = 20;} — aqui você está colocando o valor 20 nesse espaço já reservado.
+
+\end{itemize}
+
+Quando as duas coisas acontecem na mesma linha, como em \texttt{int ano = 2026;}, chamamos isso de inicialização — declaração e atribuição em um único passo. \\
+
+\textbf{Regras para identificadores (nomes de variáveis) em C:}
+
+\begin{enumerate}
+    \item Podem conter letras, dígitos e underscore (\_).
+    \item Não podem começar com um dígito.
+    \item São case-sensitive (idade e Idade são variáveis diferentes).
+    \item Não podem ser palavras reservadas da linguagem (como int, return, if).
+\end{enumerate}
+
+\textbf{A diferença em relação ao Python:} 
+em Python, uma mesma variável pode receber valores de tipos diferentes ao longo do programa (\texttt{x = 10} e depois \texttt{x = "texto"} são ambos válidos). Em C isso não é possível — uma vez declarada com um tipo, a variável só pode armazenar valores compatíveis com aquele tipo durante toda a sua existência.
+
+
+\begin{errocomum}
+
+Declarar uma variável local e tentar usá-la antes de atribuir um valor:
+
+\begin{lstlisting}
+int total;
+printf("%d", total); // comportamento indefinido!
+
+\end{lstlisting}
+
+Diferente de variáveis globais (que começam zeradas automaticamente), variáveis locais não têm um valor inicial garantido. Elas contêm "lixo de memória" — o que quer que estivesse naquele espaço antes. 
+
+\textbf{Sempre} inicialize suas variáveis antes de usá-las.
+
+    
+\end{errocomum}
+
+
+
+\section{Tipos de Dados Fundamentais}
+C possui alguns tipos básicos, chamados de \textbf{tipos primitivos}, que servem de base para tudo o que vamos construir daqui em diante:
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Tipo} & \textbf{Representa} & \textbf{Exemplo} \\
+\hline
+\texttt{char} & um único caractere & \texttt{char letra = 'A';} \\
+\hline
+\texttt{int} & um número inteiro & \texttt{int quantidade = 42;} \\
+\hline
+\texttt{float} & número real (precisão simples) & \texttt{float altura = 1.75f;} \\
+\hline
+\texttt{double} & número real (precisão dupla) & \texttt{double pi = 3.14159265;} \\
+\hline
+\texttt{void} & ausência de tipo/valor & usado principalmente em funções \\
+\hline
+\end{tabular}
+\end{center}
+
+Mais adiante, vamos discutir sobre o tipo \texttt{bool}, que representa valores verdadeiro/falso, em C com mais calma quando chegarmos às estruturas condicionais.
+
+Por enquanto, não vamos nos aprofundar em modificadores como \texttt{short}, \texttt{long}, \texttt{signed} e \texttt{unsigned} — eles merecem atenção própria e voltaremos a eles na Seção~\ref{sec:constantes-modificadores}.
+
+A ideia central desta seção é a seguinte:
+
+\begin{quote}
+\textit{Em C, o tipo faz parte da definição da variável e determina como seus bits devem ser interpretados.}
+\end{quote}
+
+Ou seja: os mesmos 4 bytes na memória podem representar um número inteiro ou um número em ponto flutuante, dependendo exclusivamente do tipo declarado. O tipo não é um detalhe burocrático — é o que dá significado aos bits armazenados.
+
+\section{Representação dos Dados na Memória}
+Este é um dos pontos em que C se diferencia claramente de linguagens de mais alto nível: podemos — e devemos — pensar em como os dados são fisicamente armazenados.
+
+Considere a declaração:
+
+\begin{lstlisting}
+int x = 10;
+\end{lstlisting}
+
+Na maioria dos sistemas atuais, um \texttt{int} ocupa \textbf{4 bytes} (32 bits) de memória. O valor \texttt{10}, representado em binário, fica armazenado assim:
+
+\begin{center}
+\texttt{
+\begin{tabular}{|c|c|c|c|}
+\hline
+00000000 & 00000000 & 00000000 & 00001010 \\
+\hline
+\end{tabular}
+}
+\\[2pt]
+\textit{4 bytes}
+\end{center}
+
+Não vamos entrar em detalhes sobre representação de números negativos (complemento de dois) neste momento — isso terá seu espaço mais à frente. O que importa agora é fixar uma cadeia de raciocínio que vai acompanhar todo o restante da apostila:
+
+\begin{center}
+\textbf{variável $\rightarrow$ tipo $\rightarrow$ bytes $\rightarrow$ memória.}
+\end{center}
+
+Toda variável que você declara reserva um espaço de memória cujo tamanho é determinado pelo seu tipo. Essa ideia é a base sobre a qual construiremos, mais adiante, os capítulos de ponteiros e de \textit{structs} — então vale a pena parar um instante e garantir que essa imagem mental ficou clara antes de avançar.
+
+\section{Constantes e Modificadores}
+\label{sec:constantes-modificadores}
+Às vezes queremos declarar uma variável cujo valor não deve mudar ao longo do programa. Para isso, usamos a palavra-chave \texttt{const}:
+
+\begin{lstlisting}
+const int idade = 20;
+\end{lstlisting}
+
+Qualquer tentativa de modificar \texttt{idade} depois disso resultará em erro de compilação — o que é útil para proteger valores que representam configurações fixas, limites ou constantes matemáticas.
+
+C também oferece \textbf{modificadores de tipo}, que ajustam o tamanho ou a forma como um número é interpretado:
+
+\begin{lstlisting}
+unsigned int  // apenas valores não negativos
+long int      // inteiro com mais bits (maior faixa de valores)
+short int     // inteiro com menos bits (faixa menor)
+\end{lstlisting}
+
+Não vamos nos aprofundar nesses modificadores agora pois eles terão uma seção própria mais adiante, quando discutirmos faixas de valores e \textit{overflow} com mais detalhe.
+
+\section{Operadores}
+Operadores são símbolos que indicam ao compilador que operação deve ser realizada sobre um ou mais valores (chamados de \textit{operandos}).
+
+\subsection{Operadores Aritméticos}
+\begin{lstlisting}
++   soma
+-   subtracao
+*   multiplicacao
+/   divisao
+%   modulo (resto da divisao inteira)
+\end{lstlisting}
+
+\subsection{Operadores Relacionais}
+Usados para comparar dois valores, sempre resultando em verdadeiro (\texttt{1}) ou falso (\texttt{0}):
+
+\begin{lstlisting}
+<    menor que
+>    maior que
+<=   menor ou igual
+>=   maior ou igual
+==   igual a
+!=   diferente de
+\end{lstlisting}
+
+\subsection{Operadores Lógicos}
+Usados para combinar expressões relacionais:
+
+\begin{lstlisting}
+&&   e (AND)
+||   ou (OR)
+!    negacao (NOT)
+\end{lstlisting}
+
+\subsection{Operadores de Atribuição}
+\begin{lstlisting}
+=    atribuicao simples
++=   soma e atribui
+-=   subtrai e atribui
+*=   multiplica e atribui
+/=   divide e atribui
+%=   calcula o modulo e atribui
+\end{lstlisting}
+
+Por exemplo, \texttt{total += 5;} é equivalente a \texttt{total = total + 5;}.
+
+\subsection{Incremento e Decremento}
+\begin{lstlisting}
+++   incremento
+--   decremento
+\end{lstlisting}
+
+\begin{lstlisting}
+i++;
+++i;
+\end{lstlisting}
+
+Vale destacar algo que costuma passar despercebido: \textbf{\texttt{++} é um operador, e não simplesmente uma abreviação textual de \texttt{i = i + 1}}. Essa distinção parece sutil agora, mas vai se tornar muito relevante quando estudarmos ponteiros e a diferença entre as formas pré-fixada (\texttt{++i}) e pós-fixada (\texttt{i++}) em expressões mais complexas, como \texttt{vetor[i++]}.
+
+\section{Conversão de Tipos}
+Em C, é possível — e às vezes necessário — converter um valor de um tipo para outro. Essa conversão é chamada de \textit{casting}.
+
+\begin{lstlisting}
+int a = 5;
+int b = 2;
+
+double resultado = (double) a / b;
+\end{lstlisting}
+
+Aqui está uma diferença importante em relação ao Python: em Python, \texttt{5 / 2} já retorna \texttt{2.5} automaticamente. Em C, \texttt{a / b} — sendo ambos \texttt{int} — realiza uma \textbf{divisão inteira}, descartando a parte decimal e resultando em \texttt{2}. Para obter o resultado com casas decimais, é preciso converter explicitamente um dos operandos para \texttt{double} (ou \texttt{float}) antes da divisão, como feito no exemplo acima.
+
+Conversões também acontecem de forma implícita, quando atribuímos um valor de um tipo a uma variável de outro tipo:
+
+\begin{lstlisting}
+int x = 10;
+double y = x;      // conversao implicita: int -> double (sem perda de dados)
+\end{lstlisting}
+
+\begin{lstlisting}
+double x = 10.5;
+int y = (int) x;    // conversao explicita: double -> int (perde a parte decimal, y = 10)
+\end{lstlisting}
+
+De forma geral, converter de um tipo "menor" para um "maior" (como \texttt{int} para \texttt{double}) é seguro. O caminho inverso pode causar perda de informação, e por isso é uma boa prática torná-lo explícito com um \textit{cast}, como em \texttt{(int) x}.
+
+\section{Entrada e Saída de Dados}
+No Capítulo 1, você já usou a função \texttt{printf} para exibir uma mensagem fixa na tela. Agora que conhecemos variáveis e tipos, podemos usá-la — e sua "parceira" \texttt{scanf} — de forma sistemática, para exibir e ler valores dinâmicos.
+
+\begin{lstlisting}
+printf("%d", idade);
+scanf("%d", &idade);
+\end{lstlisting}
+
+Cada tipo de dado tem um \textbf{especificador de formato} correspondente, usado tanto em \texttt{printf} quanto em \texttt{scanf}:
+
+\begin{lstlisting}
+%d   int
+%f   float
+%lf  double
+%c   char
+%s   string (vetor de char)
+\end{lstlisting}
+
+\begin{errocomum}
+\begin{lstlisting}
+scanf("%d", idade);   // errado
+scanf("%d", &idade);  // correto
+\end{lstlisting}
+O \texttt{scanf} precisa saber \textbf{onde}, na memória, deve escrever o valor lido — e não apenas qual valor a variável tem no momento. Por isso, é necessário passar o \textbf{endereço de memória} da variável, usando o operador \texttt{\&} antes do nome dela. Omitir o \texttt{\&} é um dos erros mais comuns entre quem está começando em C, e o compilador nem sempre vai te avisar com clareza sobre isso.
+\end{errocomum}
+
+Isso naturalmente levanta uma pergunta:
+
+\begin{quote}
+\textit{"Por que preciso colocar \texttt{\&}?"}
+\end{quote}
+
+A resposta completa para essa pergunta pertence ao capítulo sobre ponteiros, mais adiante. Por ora, fica o registro consciente de que existe algo acontecendo por trás dessa sintaxe que ainda vamos explorar em profundidade — é importante não esconder isso do aluno, mas também não se aprofundar antes da hora.
+
+\section{Escopo e Tempo de Vida}
+Toda variável tem um \textbf{escopo} — a região do código onde ela é visível e pode ser usada — e um \textbf{tempo de vida} — o período durante o qual ela existe na memória.
+
+\begin{itemize}
+    \item \textbf{Escopo local:} variáveis declaradas dentro de uma função (ou de um bloco delimitado por chaves) só existem e só podem ser acessadas dentro daquele bloco.
+    \item \textbf{Escopo global:} variáveis declaradas fora de qualquer função, no topo do arquivo, podem ser acessadas por qualquer função do programa.
+\end{itemize}
+
+\begin{lstlisting}
+int contador_global = 0; // escopo global
+
+int main(void) {
+    // escopo local, existe apenas dentro de main
+    int idade_local = 20; 
+    return 0;
+}
+\end{lstlisting}
+
+De forma geral, variáveis locais existem apenas enquanto a função em que foram declaradas está em execução — assim que a função termina, esse espaço de memória é liberado. Variáveis globais, por outro lado, existem durante toda a execução do programa.
+
+
+\section*{Resumo do Capítulo}
+Neste capítulo, deixamos de tratar variáveis como simples "caixas de valores" e passamos a enxergá-las como regiões de memória com tipo, tamanho e representação bem definidos. Vimos os tipos fundamentais de C, como declarar e inicializar variáveis, os principais operadores da linguagem, como converter entre tipos e como realizar entrada e saída básica de dados. Também demos os primeiros passos sobre escopo — um assunto que vai se tornar cada vez mais importante conforme nossos programas crescerem.
+
+\begin{objetivos}
+\begin{itemize}
+    \item Declarar e inicializar variáveis em C.
+    \item Identificar os principais tipos fundamentais.
+    \item Explicar a relação entre tipos e representação dos dados na memória.
+    \item Utilizar operadores aritméticos, relacionais e lógicos.
+    \item Realizar conversões de tipos.
+    \item Utilizar \texttt{printf} e \texttt{scanf} para entrada e saída simples.
+    \item Diferenciar escopo local e global.
+\end{itemize}
+\end{objetivos}
+
+\section*{Exercícios}
+
+\begin{exercicio}
+
+\subsection*{Fixação}
+Declare variáveis de tipos \texttt{int}, \texttt{float} e \texttt{char} para representar, respectivamente, a idade, a altura (em metros) e a inicial do primeiro nome de uma pessoa. Inicialize cada uma com um valor de sua escolha e utilize \texttt{printf} para exibir os três valores na tela, cada um com o especificador de formato adequado.
+
+
+\subsection*{Aplicação}
+Escreva um programa que leia, via \texttt{scanf}, dois números inteiros digitados pelo usuário. O programa deve calcular e exibir a soma, a diferença, o produto e o resto da divisão entre eles.
+
+
+\subsection*{Desafio}
+Analise o programa a seguir:
+
+\begin{lstlisting}
+int a = 5;
+int b = 2;
+
+printf("%d\n", a / b);
+printf("%f\n", (double)a / b);
+\end{lstlisting}
+
+Execute mentalmente (ou compile e rode, se preferir) esse trecho e responda: \textbf{por que as duas operações produzem resultados diferentes?}
+
+Tente formular sua resposta usando os conceitos de tipo e representação de dados discutidos neste capítulo — e não apenas como uma regra decorada sobre operadores.
+
+
+\end{exercicio}
+
+
+
+\begin{tcolorbox}[title=Material Complementar]
+
+Neste capítulo foram utilizados diversos exemplos práticos. As implementações completas, listas adicionais de exercícios, slides da monitoria e perguntas frequentes encontram-se disponíveis no repositório da disciplina.
+
+\end{tcolorbox}
+
+
+
+%----------------------------------------

@@ -1,0 +1,284 @@
+\chapter{Introdução}
+
+Programar é, antes de tudo, resolver problemas. Em sua essência, um programa de computador nada mais é do que uma sequência organizada de instruções capaz de transformar dados de entrada em resultados úteis. 
+Porém, essa definição simples esconde um aspecto fundamental: computadores não compreendem intenções, ideias ou objetivos.
+Eles executam apenas instruções elementares, em uma ordem rigorosamente definida, realizando milhões ou até bilhões de operações por segundo.
+
+Ao longo da história da Computação, diferentes linguagens de programação foram desenvolvidas para reduzir a distância entre a forma como os seres humanos pensam e a forma como os computadores executam instruções. 
+Linguagens de alto nível, como Python, permitem que problemas complexos sejam descritos por meio de comandos simples e expressivos, 
+abstraindo detalhes relacionados à organização da memória, ao gerenciamento de recursos e à arquitetura do processador. 
+Essa capacidade torna o desenvolvimento de software mais produtivo e acessível, permitindo que o programador concentre seus esforços na lógica da solução.
+
+Entretanto, compreender apenas essas abstrações é conhecer apenas uma parte do processo. Em diversas áreas da Computação, como sistemas operacionais, compiladores, sistemas embarcados, 
+arquitetura de computadores, processamento de alto desempenho e desenvolvimento de drivers, torna-se necessário compreender como os dados são realmente armazenados, manipulados e transferidos pela máquina. 
+É nesse contexto que a linguagem C assume um papel de destaque.
+
+Desenvolvida no início da década de 1970 por Dennis Ritchie, nos Laboratórios Bell, a linguagem C surgiu com o objetivo de oferecer uma alternativa eficiente e portável para o desenvolvimento do sistema operacional UNIX. 
+Desde então, tornou-se uma das linguagens mais influentes da história da Computação, servindo de base para inúmeras outras linguagens modernas e 
+permanecendo amplamente utilizada em aplicações nas quais desempenho, controle de memória e acesso direto ao \textit{hardware} são requisitos fundamentais.
+
+Estudar C não significa abandonar as facilidades oferecidas pelas linguagens modernas, mas compreender os mecanismos que tornam essas facilidades possíveis. 
+Conceitos como ponteiros, organização da memória, pilha de execução, alocação dinâmica e 
+representação binária dos dados constituem fundamentos presentes, de forma direta ou indireta, em praticamente todas as áreas da Computação. 
+Assim, aprender C representa uma oportunidade de desenvolver uma compreensão mais profunda sobre o funcionamento dos programas e dos computadores.
+
+Ao longo desta apostila, os conceitos serão apresentados de maneira gradual, sempre buscando estabelecer uma relação entre a escrita do código e o comportamento do programa durante sua execução. 
+Sempre que possível, serão utilizados diagramas de memória, exemplos comentados e exercícios progressivos para auxiliar na construção de um modelo mental consistente sobre o funcionamento interno da linguagem.
+
+
+\section{O que significa programar?}
+
+Programar é, antes de tudo, uma forma de resolver problemas. Quando escrevemos um programa, estamos descrevendo, passo a passo, como um computador deve agir para transformar uma entrada em uma saída desejada. Não é sobre "escrever código" no sentido mecânico — é sobre pensar de forma estruturada, quebrar um problema grande em partes menores e traduzir esse raciocínio em instruções que uma máquina consiga executar sem ambiguidade.
+
+Diferente de um ser humano, o computador não interpreta intenções. Ele não "entende" o que você quer dizer, apenas o que você efetivamente escreveu. Por isso, programar exige precisão: cada instrução precisa ser exata, cada condição precisa estar bem definida, cada passo precisa ter uma ordem clara. Essa exigência de rigor é, ao mesmo tempo, o que torna a programação desafiadora no início e extremamente poderosa depois que você domina o processo — porque uma vez que o computador sabe exatamente o que fazer, ele faz isso rapidamente, repetidamente e sem erros de execução.
+
+Aprender a programar, portanto, é menos sobre decorar sintaxe e mais sobre desenvolver uma forma de pensar: o chamado \textbf{pensamento computacional}. É a habilidade de olhar para um problema do mundo real e enxergar nele uma sequência lógica de passos que pode ser automatizada.
+
+
+
+\section{Do problema ao algoritmo}
+
+Antes de qualquer linha de código, existe um problema. E antes de qualquer programa, existe um \textbf{algoritmo}: uma sequência finita e bem definida de passos que resolve esse problema.
+
+Pense em uma tarefa simples do dia a dia, como fazer um café. Existe uma ordem lógica de ações: ferver a água, moer o pó (se necessário), colocar o pó no filtro, despejar a água, esperar coar. Se você trocar a ordem dos passos ou pular algum, o resultado muda ou simplesmente não funciona. Um algoritmo de programação segue a mesma lógica, só que aplicado a problemas computacionais: somar dois números, ordenar uma lista de nomes, verificar se uma senha é válida, calcular a média de notas de uma turma.
+
+O processo de desenvolvimento de software segue, de forma geral, este caminho:
+
+
+\begin{enumerate}
+
+\item \textbf{Entender o problema:} o que exatamente precisa ser resolvido?
+\item \textbf{Projetar o algoritmo:} quais passos, em qual ordem, resolvem esse problema?
+\item \textbf{Implementá-lo:} traduzir o algoritmo para uma linguagem de programação.
+\item \textbf{Testar:} verificar se o programa realmente resolve o problema em diferentes situações.
+
+\end{enumerate}
+
+
+É comum que iniciantes pulem direto para o passo 3, tentando escrever código antes de entender o problema ou pensar no algoritmo. Isso costuma gerar programas confusos e cheios de erros. Uma boa prática — que vamos reforçar ao longo de toda a apostila — é sempre rascunhar o algoritmo antes de programar, seja em português mesmo, seja em pseudocódigo, seja em um simples diagrama.
+
+
+\section{Da linguagem humana à linguagem de máquina}
+
+Nós pensamos e nos comunicamos em linguagem natural: português, inglês, e assim por diante. O computador, por outro lado, só entende sequências de 0s e 1s — a chamada \textbf{linguagem de máquina}. Entre esses dois extremos existe uma escada de abstração, e é nela que as linguagens de programação se encaixam.
+
+\begin{itemize}
+
+    \item No nível mais baixo está o \textbf{código binário}, que o processador executa diretamente.
+    \item Um pouco acima está o \textbf{assembly}, que usa mnemônicos (como \texttt{MOV}, \texttt{ADD}, \texttt{JMP}) para representar instruções de máquina de forma um pouco mais legível para humanos, mas ainda extremamente ligada ao hardware.
+    \item Acima disso estão as \textbf{linguagens de alto nível}, como C, Python, Java, entre outras, que usam palavras e estruturas mais próximas do raciocínio humano.
+    
+\end{itemize}
+
+
+Quando você escreve um programa em C, esse código não é executado diretamente pelo processador. Ele precisa passar por um \textbf{compilador}, um programa que traduz o código-fonte escrito por você para linguagem de máquina, gerando um arquivo executável.
+
+C ocupa uma posição interessante nessa escada: é considerada uma linguagem de \textbf{médio nível}. Ela tem estruturas legíveis para humanos (laços, condicionais, funções), mas também permite manipular a memória do computador de forma bastante direta — algo que linguagens mais modernas costumam esconder do programador. É justamente esse equilíbrio que torna C tão importante de se entender, como veremos a seguir.
+
+
+\section{O surgimento da linguagem C}
+
+A linguagem C foi criada no início da década de 1970 por \textbf{Dennis Ritchie}, nos Laboratórios Bell (Bell Labs), com o objetivo original de desenvolver o sistema operacional \textbf{Unix}. Antes de C, sistemas operacionais eram escritos quase inteiramente em assembly — um processo lento, difícil de manter e completamente dependente do hardware específico de cada máquina.
+
+C nasceu como evolução de linguagens anteriores, como a \textbf{B} (criada por Ken Thompson) e a \textbf{BCPL}. A grande sacada de Ritchie foi criar uma linguagem poderosa o suficiente para escrever um sistema operacional inteiro, mas portável o bastante para rodar em diferentes arquiteturas de hardware sem precisar reescrever tudo do zero.
+
+O sucesso foi tão grande que, em pouco tempo, o próprio Unix foi reescrito em C, e a linguagem se espalhou junto com a adoção do sistema pelo mundo acadêmico e, depois, comercial. Em 1978, Brian Kernighan e Dennis Ritchie publicaram o livro \textit{The C Programming Language}, obra que se tornou referência tão importante que muita gente ainda chama a versão clássica da linguagem de "C K\&R" (Kernighan \& Ritchie).
+
+Com o tempo, C passou por processos de padronização formal — ANSI C (1989), depois ISO C (C90, C99, C11, C17, C23) — garantindo que compiladores diferentes, em sistemas diferentes, interpretassem a linguagem da mesma forma.
+
+\section{Por que estudar C atualmente?}
+
+Se você já programou em Python, provavelmente nunca precisou se preocupar com onde uma variável estava armazenada na memória. Em C, essa preocupação deixa de ser um detalhe e passa a fazer parte da programação. Então, mais de cinquenta anos depois de criada, por qual motivo C continua extremamente relevante? 
+Não é apenas por tradição ou nostalgia, existem razões práticas concretas:
+
+
+\begin{itemize}
+    \item[--] \textbf{C é a base de grande parte da computação moderna:} Sistemas operacionais, compiladores, bibliotecas e diversas linguagens de programação possuem componentes implementados em C. Compreender a linguagem significa compreender parte dos fundamentos sobre os quais a computação atual foi construída.
+    \item[--] \textbf{C permite compreender o funcionamento interno do computador:} Ao programar em C, passamos a lidar explicitamente com memória, ponteiros, organização dos dados e outros conceitos que normalmente permanecem ocultos em linguagens de alto nível. Essa experiência desenvolve uma compreensão mais profunda sobre como os programas realmente são executados.
+    \item[--] \textbf{C continua essencial em aplicações de baixo nível:} Sistemas embarcados, firmware, drivers de dispositivos, sistemas operacionais e diversas aplicações que exigem controle direto do hardware ainda utilizam C como uma das principais linguagens de desenvolvimento.
+\end{itemize}
+
+Em resumo: você não está aprendendo C apenas para "escrever programas em C". Está aprendendo os fundamentos que sustentam praticamente toda a computação moderna.
+
+
+\section{Estrutura de um programa em C}
+\label{sec:estrutura-programa}
+
+Tradicionalmente, o primeiro programa apresentado em uma linguagem de programação é aquele que exibe uma simples mensagem na tela. Embora pareça um exemplo modesto, esse programa reúne os principais elementos estruturais que aparecerão em praticamente todos os programas escritos em C. Por esse motivo, ele será utilizado como ponto de partida para compreender a organização básica de um programa.
+
+\begin{lstlisting}
+#include <stdio.h>
+
+int main(void)
+{
+    printf("Hello, world!\n");
+    return 0;
+}
+\end{lstlisting}
+
+Vamos analisar, a seguir, cada parte desse programa.
+
+\begin{curiosidade}
+
+Embora hoje seja tradição iniciar o estudo de uma linguagem de programação
+com um programa que imprime ``Hello, World!'', essa expressão foi
+popularizada por Brian Kernighan. Ela apareceu inicialmente em um exemplo do
+livro \textit{A Tutorial Introduction to the Language B} (1973) e,
+posteriormente, tornou-se mundialmente conhecida por meio do clássico
+\textit{The C Programming Language} (1978), escrito por Brian Kernighan e
+Dennis Ritchie.
+
+\end{curiosidade}
+
+Usando a numeração das linhas temos em ordem crescente:
+
+\texttt{\#include <stdio.h>} \\
+Essa linha é uma \textbf{diretiva de pré-processador}. Antes mesmo da compilação, ela instrui o pré-processador a incluir o conteúdo da biblioteca padrão de entrada e saída (\texttt{stdio.h}, de \textit{standard input/output}), que contém a declaração de funções como \texttt{printf} (usada para exibir texto na tela) e \texttt{scanf} (usada para ler dados digitados pelo usuário).
+
+\texttt{int main(void)} \\
+Toda execução de um programa em C começa em uma função chamada \texttt{main}. É o ponto de entrada de todo programa em C. O \texttt{int} antes do nome indica que essa função devolve um número inteiro ao sistema operacional quando termina — normalmente usado para indicar se o programa foi executado com sucesso ou não. O \texttt{void} entre parênteses indica que essa função não recebe parâmetros de entrada.
+
+\texttt{\{...\}} \\
+As chaves delimitam o corpo da função, isto é, o conjunto de instruções que será executado quando a função for chamada. No caso da função \texttt{main}, esse bloco corresponde ao código executado quando o programa é iniciado.
+
+\texttt{printf("Hello, world!\textbackslash n");} \\
+A função \texttt{printf} é utilizada para exibir informações na tela. Nesse exemplo, ela recebe como argumento a sequência de caracteres \texttt{"Hello, world!\textbackslash n"}, passando o texto que queremos exibir. O \texttt{\textbackslash n} no final é um caractere especial que representa uma quebra de linha. Note o ponto e vírgula (\texttt{;}) ao final — em C, ele marca o fim de cada instrução, e sua ausência é um dos erros mais comuns entre iniciantes.
+
+\texttt{return 0;} \\
+Essa linha finaliza a função \texttt{main}, devolvendo o valor \texttt{0} ao sistema operacional. Por convenção, \texttt{0} significa que o programa terminou sem erros. Em programas simples, essa linha costuma aparecer no final da função \texttt{main}. Ao longo da apostila veremos que outras funções também podem utilizar a instrução \texttt{return} para devolver resultados ao programa.
+
+De forma geral, todo programa em C segue este esqueleto:
+
+\begin{lstlisting}
+#include <biblioteca_1>
+#include <biblioteca_2>
+...
+
+int main(void) {
+    // instruções do programa
+    return 0;
+}
+\end{lstlisting}
+
+Naturalmente, programas reais podem conter diversas outras funções, declarações, estruturas de dados e bibliotecas. Entretanto, a estrutura apresentada acima representa o núcleo de um programa em C e servirá como base para os próximos capítulos.
+
+\begin{observacao}
+
+Neste momento, não se preocupe em memorizar todos os detalhes do programa.
+Ao longo dos próximos capítulos, cada um desses elementos será estudado
+individualmente. O objetivo desta seção é apenas apresentar a estrutura geral
+de um programa em C e familiarizar o leitor com sua organização.
+
+\end{observacao}
+
+
+\section{Compilando o primeiro programa}
+
+Diferente de linguagens interpretadas, um programa em C precisa ser compilado antes de ser executado. O compilador lê o código-fonte (o arquivo \texttt{.c} que você escreveu) e gera um arquivo executável, específico para o sistema operacional e a arquitetura de hardware em que foi compilado.
+
+Um dos compiladores mais usados, especialmente em ambientes Linux e no ensino, é o \textbf{GCC} (GNU Compiler Collection). Supondo que você tenha salvo o programa da Seção~\ref{sec:estrutura-programa} em um arquivo chamado \texttt{ola\_mundo.c}, o processo básico de compilação e execução no terminal seria:
+
+
+\begin{terminal}
+aluno@ubuntu:~$ gcc ola_mundo.c -o ola_mundo
+
+aluno@ubuntu:~$ ./ola_mundo
+
+\end{terminal}
+
+
+Explicando cada parte:
+
+\begin{tabular}{p{4.4cm}p{10cm}}
+\texttt{gcc} & Invoca o compilador GCC.\\[0.2cm]
+
+\texttt{ola\_mundo.c} &
+Arquivo-fonte que será compilado.\\[0.2cm]
+
+\texttt{-o ola\_mundo} &
+Define o nome do executável gerado.\\[0.2cm]
+
+\texttt{./ola\_mundo} &
+Executa o programa localizado no diretório atual.
+\end{tabular}
+
+
+Assim, se tudo estiver correto, a saída no terminal será:
+
+\begin{terminal}
+Hello, world!
+\end{terminal}
+
+Caso exista algum erro de sintaxe — como esquecer um ponto e vírgula ou uma chave — o compilador vai recusar a compilação e exibir mensagens de erro apontando a linha e o tipo de problema encontrado. Aprender a ler essas mensagens de erro é uma habilidade tão importante quanto aprender a escrever o código em si, e vamos treinar isso bastante ao longo da apostila.
+
+
+\section*{Resumo do Capítulo}
+
+Parabéns! Você acabou de escrever, compilar e executar seu primeiro programa em C. Embora simples, esse exemplo percorreu todas as etapas fundamentais do desenvolvimento: partiu de um arquivo de código-fonte, passou pelo processo de compilação e resultou em um programa executável.
+
+Ao longo do capítulo, você também conheceu o contexto histórico da linguagem C e refletiu sobre o verdadeiro papel da programação: utilizar o computador como ferramenta para resolver problemas por meio de algoritmos.
+
+Nos próximos capítulos, ampliaremos gradualmente essa estrutura, introduzindo variáveis, operadores, estruturas de controle e funções, até que você seja capaz de desenvolver programas cada vez mais completos.
+
+\begin{objetivos}
+
+\begin{itemize}
+    \item Explicar, em linhas gerais, como surgiu a linguagem C e sua importância histórica.
+    \item Diferenciar algoritmo de programa.
+    \item Identificar os principais componentes da estrutura de um programa em C.
+    \item Compreender o papel das diretivas de pré-processador e da função \texttt{main}.
+    \item Compilar e executar um programa simples utilizando o GCC.
+    \item Interpretar mensagens básicas de erro emitidas pelo compilador.
+\end{itemize}
+
+\end{objetivos}
+
+\section*{Erros comuns}
+
+\begin{errocomum}
+
+\textbf{Esquecer o ponto e vírgula (\texttt{;})}
+
+Para quem teve o primeiro contato com programação em Python, é recorrente esquecer o ponto e vírgula ao final das instruções. Em C, praticamente toda instrução deve ser finalizada com \texttt{';'}. Quando isso não acontece, o compilador informa um erro de sintaxe.
+\newline
+\newline \textbf{Python}
+
+\begin{lstlisting}
+print("Betas usam Python.")
+\end{lstlisting}
+
+\textbf{C}
+
+\begin{lstlisting}
+printf("Trivial.");
+\end{lstlisting}
+
+\end{errocomum}
+
+
+\section*{Exercícios}
+
+\begin{exercicio}
+
+\subsection*{Fixação} 
+Explique, com suas palavras, por que a linguagem C continua sendo importante para a formação de um profissional de Computação, mesmo existindo linguagens mais modernas. \newline
+
+\subsection*{Aplicação} 
+Escreva um programa em C que exiba seu nome, idade e cidade que nasceu na tela (com a exata formatação a seguir):
+
+\begin{terminal}
+Rafael, 21
+Aracaju-SE.
+\end{terminal}
+
+Em seguida, compile e execute o programa utilizando o GCC.
+
+\subsection*{Reflexão} 
+Neste capítulo, vimos que um programa em C precisa ser compilado antes de ser executado. Em Python, normalmente basta executar o arquivo diretamente.
+\textbf{Pesquise}, em poucas linhas, qual é a diferença entre uma linguagem compilada e uma linguagem interpretada. Em sua opinião, quais vantagens e desvantagens cada abordagem apresenta?
+    
+\end{exercicio}
+
+    
+
+%----------------------------------------

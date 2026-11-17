@@ -1,0 +1,379 @@
+\chapter{Organização da Memória}
+
+Ao longo dos capítulos anteriores, acumulamos uma série de regras sobre como variáveis e funções se comportam em C:
+
+\begin{itemize}
+    \item variáveis locais não inicializadas contêm ``lixo de memória'', enquanto variáveis globais começam automaticamente zeradas (Capítulo 2);
+    \item variáveis locais deixam de existir assim que a função em que foram declaradas termina, enquanto variáveis globais existem durante toda a execução do programa (Capítulos 2 e 4);
+    \item parâmetros de funções são cópias independentes das variáveis de quem chamou a função (Capítulo 4);
+    \item uma função não pode devolver com segurança o endereço de um vetor local criado dentro dela (Capítulo 6).
+\end{itemize}
+
+Quando apresentadas isoladamente, essas regras podem parecer decisões arbitrárias da linguagem. Na realidade, todas elas são consequências diretas de um único fato: \textbf{a memória de um programa em execução não é um bloco único e uniforme}. Ela é dividida em regiões bem definidas, cada uma com um propósito específico, regras próprias de acesso e um tempo de vida distinto.
+
+Neste capítulo, vamos abrir a ``caixa-preta'' de um programa em execução e estudar cada uma dessas regiões. Compreender essa organização não apenas unifica tudo o que vimos até aqui, como também prepara a base indispensável para o Capítulo 10, em que aprenderemos a alocar e liberar memória dinamicamente.
+
+\section{Visão Geral do Espaço de Memória de um Processo}
+\label{sec:visao-geral-memoria}
+
+Quando você compila um arquivo \texttt{.c} com o GCC e executa o binário gerado, o sistema operacional cria um \textbf{processo} e reserva para ele um espaço de endereçamento na memória. Em vez de misturar instruções, variáveis globais e variáveis locais no mesmo lugar, o sistema organiza a memória desse processo em \textbf{cinco regiões clássicas} (também chamadas de \textit{segmentos}):
+
+\begin{enumerate}
+    \item \textbf{Segmento de Código (\textit{Text}):} armazena as instruções compiladas do programa e constantes somente de leitura.
+    \item \textbf{Segmento de Dados Inicializados (\textit{Data}):} armazena variáveis globais e estáticas que começam com um valor definido no código.
+    \item \textbf{Segmento de Dados Não Inicializados (\textit{BSS}):} armazena variáveis globais e estáticas declaradas sem valor inicial explícito.
+    \item \textbf{Memória Dinâmica (\textit{Heap}):} região flexível para dados alocados manualmente durante a execução do programa.
+    \item \textbf{Pilha (\textit{Stack}):} região que cresce e encolhe automaticamente a cada chamada e retorno de função, guardando variáveis locais e parâmetros.
+\end{enumerate}
+
+Tradicionalmente, representamos esse espaço de memória como um diagrama vertical, indo dos menores endereços (na base) até os maiores endereços (no topo):
+
+\begin{center}
+\small
+\texttt{
+\begin{tabular}{|c|l}
+\cline{1-1}
+\textbf{Stack (Pilha)} & $\leftarrow$ locais e parâmetros (cresce p/ baixo $\downarrow$) \\
+\cline{1-1}
+$\downarrow$ & \\
+\vdots & \textit{espaço livre para crescimento} \\
+$\uparrow$ & \\
+\cline{1-1}
+\textbf{Heap} & $\leftarrow$ alocação dinâmica (cresce p/ cima $\uparrow$) \\
+\cline{1-1}
+\textbf{BSS} & $\leftarrow$ globais/\texttt{static} não inicializadas (zeradas) \\
+\cline{1-1}
+\textbf{Data} & $\leftarrow$ globais/\texttt{static} inicializadas \\
+\cline{1-1}
+\textbf{Text (Código)} & $\leftarrow$ instruções e literais (somente leitura) \\
+\cline{1-1}
+\end{tabular}
+}
+\end{center}
+
+Observe que essas cinco regiões se dividem em dois grandes grupos:
+
+\begin{itemize}
+    \item \textbf{Regiões estáticas (\textit{Text}, \textit{Data} e \textit{BSS}):} têm tamanho fixo, determinado já na compilação. O espaço que ocupam é reservado quando o programa começa e permanece inalterado até o programa terminar.
+    \item \textbf{Regiões dinâmicas (\textit{Stack} e \textit{Heap}):} mudam de tamanho enquanto o programa roda. A \textit{Stack} e a \textit{Heap} ficam em extremidades opostas da área livre e crescem uma em direção à outra conforme o programa chama funções ou solicita memória extra.
+\end{itemize}
+
+Vamos examinar cada uma dessas regiões em detalhe.
+
+\section{Segmento de Código (Text)}
+\label{sec:segmento-text}
+
+O \textbf{segmento de código} — historicamente chamado de \textit{Text} — contém as instruções de máquina que o processador executa: o código compilado de \texttt{main} e de todas as outras funções do programa. Além das instruções, os compiladores costumam armazenar nessa região (ou em uma sub-região adjacente chamada \texttt{.rodata}, de \textit{read-only data}) dados constantes que não devem ser alterados durante a execução, como \textbf{strings literais}.
+
+Duas características definem o segmento \textit{Text}:
+
+\begin{enumerate}
+    \item Seu tamanho é \textbf{fixo}, pois o código do programa não muda enquanto ele está rodando.
+    \item Ele é marcado pelo sistema operacional como \textbf{somente leitura} (\textit{read-only}). Se o programa tentar escrever nessa região — por exemplo, por meio de um ponteiro mal utilizado —, o próprio hardware e o sistema operacional interrompem a execução imediatamente, evitando que o programa corrompa suas próprias instruções.
+\end{enumerate}
+
+Essa característica explica uma diferença sutil e muito importante ao trabalhar com strings e ponteiros em C:
+
+\begin{lstlisting}
+char vetor[] = " C ";    // copia os caracteres para um vetor local (na Stack)
+char *ponteiro = " C ";  // aponta diretamente para a literal (somente leitura)
+\end{lstlisting}
+
+No primeiro caso, a string literal \texttt{" C "} serve apenas como modelo para inicializar o vetor \texttt{vetor}, que vive em memória modificável: fazer \texttt{vetor[1] = 'X';} é perfeitamente válido. No segundo caso, \texttt{ponteiro} guarda diretamente o endereço onde a string literal está gravada na região somente leitura.
+
+\begin{errocomum}
+Tentar modificar o conteúdo de uma string literal através de um ponteiro:
+\begin{lstlisting}
+char *mensagem = "ola";
+mensagem[0] = 'O'; // ERRO em tempo de execucao (Segmentation Fault)!
+\end{lstlisting}
+Como a string literal \texttt{"ola"} fica armazenada em uma região de memória protegida contra escrita, tentar alterar qualquer um de seus caracteres causa comportamento indefinido — na prática, o sistema operacional encerra o programa imediatamente. Por esse motivo, sempre que um ponteiro apontar para uma string literal, declare-o como \texttt{const char *mensagem = "ola";}: assim, qualquer tentativa acidental de escrita será barrada já na compilação.
+\end{errocomum}
+
+\section{Segmento de Dados Inicializados (Data)}
+\label{sec:segmento-data}
+
+O segmento \textbf{Data} armazena variáveis que precisam existir durante \textbf{toda a execução do programa} e que já possuem um \textbf{valor inicial diferente de zero} definido diretamente no código-fonte.
+
+Entram nessa categoria dois tipos de variáveis:
+
+\begin{itemize}
+    \item \textbf{Variáveis globais inicializadas:} declaradas fora de qualquer função com um valor inicial explícito.
+    \item \textbf{Variáveis locais \texttt{static} inicializadas:} declaradas dentro de uma função com a palavra-chave \texttt{static} e um valor inicial.
+\end{itemize}
+
+\begin{lstlisting}
+int taxa_maxima = 100; // global inicializada -> vive no segmento Data
+
+void registrar_chamada(void) {
+    static int chamadas = 1; // static inicializada -> tambem vive em Data
+    printf("Chamada numero %d\n", chamadas);
+    chamadas++;
+}
+\end{lstlisting}
+
+Vale notar o papel do modificador \texttt{static} aplicado a uma variável local: embora o \textbf{escopo} de \texttt{chamadas} continue restrito à função \texttt{registrar\_chamada} (ninguém de fora consegue enxergá-la), seu \textbf{tempo de vida} deixa de ser o da função e passa a ser o do programa inteiro. Como ela mora no segmento \textit{Data} (e não na \textit{Stack}), ela é inicializada uma única vez quando o programa começa e preserva seu valor entre uma chamada e outra.
+
+\section{Segmento de Dados Não Inicializados (BSS)}
+\label{sec:segmento-bss}
+
+O segmento \textbf{BSS} armazena variáveis globais e variáveis \texttt{static} que \textbf{não foram inicializadas explicitamente} no código (ou que foram inicializadas com zero):
+
+\begin{lstlisting}
+int contador_global;        // global nao inicializada -> vive no BSS (vale 0)
+static int buffer[10000];   // static nao inicializado -> vive no BSS (tudo 0)
+\end{lstlisting}
+
+Quando o programa é carregado na memória para começar a rodar, o sistema operacional reserva o espaço correspondente ao segmento \textit{BSS} e \textbf{preenche todos os seus bytes com zero}. É exatamente por isso que, como vimos no Capítulo 2, variáveis globais sempre começam zeradas automaticamente.
+
+\begin{curiosidade}
+O nome \textbf{BSS} vem de \textit{Block Started by Symbol}, um comando de um antigo montador (\textit{assembler}) desenvolvido na década de 1950 para computadores IBM 704. Mas por que separar \textit{Data} e \textit{BSS} em duas regiões diferentes até hoje?
+
+A razão é economia de espaço no arquivo executável em disco. Se você declara um vetor global inicializado \texttt{int v[10000] = \{1, 2, 3, ...\};} no segmento \textit{Data}, todos esses valores precisam estar gravados fisicamente dentro do arquivo executável. Já se você declara \texttt{int v[10000];} sem inicialização no \textit{BSS}, o arquivo executável não precisa guardar 40 mil bytes de zeros no disco: ele guarda apenas uma anotação dizendo ao sistema operacional ``quando carregar este programa na memória, reserve 40.000 bytes zerados aqui''.
+\end{curiosidade}
+
+\section{Pilha (Stack)}
+\label{sec:segmento-stack}
+
+A \textbf{pilha de execução} (\textit{Stack}) é a região responsável por sustentar o funcionamento das funções em C. Todas as variáveis locais comuns (sem \texttt{static}) e todos os parâmetros de funções são armazenados na \textit{Stack}.
+
+O nome ``pilha'' vem da forma como essa região opera, seguindo a regra \textbf{LIFO} (\textit{Last In, First Out} — o último a entrar é o primeiro a sair):
+
+\begin{enumerate}
+    \item Sempre que uma função é chamada, um bloco contíguo de memória chamado \textbf{quadro de ativação} (\textit{stack frame}) é empilhado no topo da \textit{Stack}. Esse quadro reserva espaço para os parâmetros da função, suas variáveis locais e o endereço de retorno (para o processador saber para qual linha voltar quando a função terminar).
+    \item Enquanto a função executa, ela lê e modifica as variáveis dentro do seu próprio quadro.
+    \item Se essa função chama uma segunda função, um novo quadro é empilhado acima do anterior.
+    \item Quando uma função chega ao \texttt{return} (ou à sua chave final), seu quadro de ativação é imediatamente \textbf{desempilhado}: o topo da pilha simplesmente recua para o quadro da função anterior, e toda a memória local da função que terminou é considerada livre.
+\end{enumerate}
+
+Considere o exemplo a seguir:
+
+\begin{lstlisting}
+int somar(int a, int b) {
+    int resultado = a + b;
+    return resultado;
+}
+
+int main(void) {
+    int x = 10;
+    int y = 20;
+    int s = somar(x, y);
+    return 0;
+}
+\end{lstlisting}
+
+Durante a execução de \texttt{somar(x, y)}, a \textit{Stack} contém dois quadros ativos simultaneamente:
+
+\begin{center}
+\texttt{
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Quadro na Stack} & \textbf{Variáveis armazenadas} \\
+\hline
+\textbf{main} & \texttt{x = 10}, \texttt{y = 20}, \texttt{s = ?} \\
+\hline
+\textbf{somar} (topo atual) & \texttt{a = 10}, \texttt{b = 20}, \texttt{resultado = 30} \\
+\hline
+\end{tabular}
+}
+\\[4pt]
+\textit{Assim que \texttt{somar} executa \texttt{return}, seu quadro é descartado e o controle volta a \texttt{main}.}
+\end{center}
+
+Enxergar a \textit{Stack} dessa forma explica, de uma só vez, três comportamentos fundamentais da linguagem C:
+
+\begin{itemize}
+    \item \textbf{Por que variáveis locais contêm ``lixo de memória''?} Porque empilhar e desempilhar quadros precisa ser uma operação extremamente rápida: o programa apenas move um marcador indicando onde o topo da pilha está, sem perder tempo limpando os bytes que uma função anterior deixou ali. Se você declarar \texttt{int total;} sem inicializar, essa variável vai ocupar exatamente os bytes onde outra função havia guardado outros dados momentos antes.
+    \item \textbf{Por que a passagem por valor não altera a variável original?} Porque \texttt{a} e \texttt{b} vivem no quadro de \texttt{somar}, em endereços diferentes de \texttt{x} e \texttt{y}, que vivem no quadro de \texttt{main}.
+    \item \textbf{Por que o gerenciamento da \textit{Stack} é automático?} Porque o compilador sabe exatamente quando cada função começa e termina, reservando e liberando os quadros sem que o programador precise escrever nenhuma linha extra para isso.
+\end{itemize}
+
+Por outro lado, a \textit{Stack} impõe duas limitações severas. A primeira é que **nenhum dado local sobrevive ao fim da função**:
+
+\begin{errocomum}
+Devolver o endereço de uma variável local (ou vetor local) criada dentro da função:
+\begin{lstlisting}
+int *criar_inteiro(void) {
+    int valor = 42;
+    return &valor; // ERRO GRAVE: valor deixara de existir no return!
+}
+\end{lstlisting}
+Quando \texttt{criar\_inteiro} termina, seu quadro na \textit{Stack} é desempilhado. O ponteiro devolvido passa a apontar para uma região da pilha que já não pertence a nenhuma variável válida e que será sobrescrita na próxima chamada de função. Um ponteiro que aponta para memória já invalidada é chamado de \textbf{ponteiro pendente} (\textit{dangling pointer}), e usá-lo causa comportamento indefinido.
+\end{errocomum}
+
+A segunda limitação é o \textbf{tamanho máximo da pilha}. O sistema operacional reserva um limite relativamente pequeno para a \textit{Stack} (tipicamente entre 1~MB e 8~MB). Declarar vetores locais gigantescos (como \texttt{int matriz[2000][2000];} dentro de \texttt{main}) ou fazer chamadas de função que se aprofundam indefinidamente esgota esse espaço — causando o famoso erro de \textbf{estouro de pilha} (\textit{stack overflow}), que voltaremos a encontrar no Capítulo 15 ao estudar recursão.
+
+\section{Memória Dinâmica (Heap)}
+\label{sec:segmento-heap}
+
+Se as regiões estáticas (\textit{Data} e \textit{BSS}) exigem que o tamanho de tudo seja conhecido na compilação, e a \textit{Stack} tem tamanho limitado e destrói seus dados assim que a função retorna, onde podemos armazenar dados quando:
+
+\begin{enumerate}
+    \item \textbf{não sabemos o tamanho de antemão} (por exemplo, o tamanho depende de um arquivo lido ou de uma entrada do usuário);
+    \item precisamos de um \textbf{volume grande de memória} que não caberia com segurança na \textit{Stack}; ou
+    \item precisamos que um dado criado dentro de uma função \textbf{continue existindo depois que a função terminar}?
+\end{enumerate}
+
+A resposta para os três casos é a \textbf{Heap} (memória dinâmica).
+
+Diferente da \textit{Stack}, a \textit{Heap} não está amarrada ao início e ao fim das funções. Ela funciona como um grande reservatório de memória livre que o programa pode solicitar sob demanda, em tempo de execução, no tamanho exato de que precisar. Um bloco de memória reservado na \textit{Heap} \textbf{permanece alocado pelo tempo que o programador quiser} — ele sobrevive ao retorno da função que o criou e só deixa de existir quando o programador o libera explicitamente (ou quando o programa inteiro termina).
+
+Há um detalhe fundamental na forma como acessamos a \textit{Heap}: blocos alocados na \textit{Heap} \textbf{não possuem nome de variável}. A única forma de acessar um dado na \textit{Heap} é por meio de um \textbf{ponteiro} que guarde o seu endereço.
+
+Na prática, o padrão mais comum combina \textit{Stack} e \textit{Heap}: uma variável ponteiro \texttt{p} vive na \textit{Stack} (como variável local de uma função), mas o endereço guardado dentro de \texttt{p} aponta para um bloco de dados lá na \textit{Heap}:
+
+\begin{center}
+\texttt{
+\begin{tabular}{ccc}
+\begin{tabular}{|c|}
+\hline
+\textbf{Stack} \\
+\hline
+p = 0x5000 \\
+\hline
+\end{tabular}
+&
+$\longrightarrow$
+&
+\begin{tabular}{|c|c|c|c|}
+\hline
+\multicolumn{4}{|c|}{\textbf{Heap} (a partir de 0x5000)} \\
+\hline
+10 & 20 & 30 & 40 \\
+\hline
+\end{tabular}
+\end{tabular}
+}
+\end{center}
+
+Essa liberdade tem um preço direto: enquanto a \textit{Stack} é limpa automaticamente a cada retorno de função, **na \textit{Heap} toda a responsabilidade é do programador**. Se você solicitar memória na \textit{Heap} e perder o ponteiro que apontava para ela sem liberá-la antes, aquele bloco ficará ocupado inutilmente até o fim do programa. Como pedir, redimensionar e devolver blocos da \textit{Heap} com segurança é exatamente o tema do Capítulo 10.
+
+\section{Ciclo de Vida das Variáveis e Regiões de Memória}
+\label{sec:ciclo-vida-regioes}
+
+Para consolidar a visão conjunta das cinco regiões, observe o programa abaixo, que reúne elementos armazenados em diferentes partes da memória:
+
+\begin{lstlisting}
+#include <stdio.h>
+
+int global_init = 42;       // Segmento Data
+int global_nao_init;        // Segmento BSS (inicia com 0)
+
+void exemplo(int param) {   // 'param' vive na Stack
+    static int cont = 0;    // Segmento BSS/Data (persiste entre chamadas)
+    int local = 10;         // Stack (criada a cada chamada)
+    const char *msg = "Oi"; // 'msg' na Stack; literal "Oi" no Segmento Text
+
+    cont++;
+    printf("%s: param=%d, local=%d, cont=%d\n", msg, param, local, cont);
+}
+
+int main(void) {            // codigo de main e exemplo vive no Segmento Text
+    exemplo(5);
+    exemplo(5);
+    return 0;
+}
+\end{lstlisting}
+
+Na primeira chamada a \texttt{exemplo(5)}, \texttt{local} é criada na \textit{Stack} com valor \texttt{10}, e \texttt{cont} passa de \texttt{0} para \texttt{1}. Quando a primeira chamada termina, o quadro de \texttt{exemplo} na \textit{Stack} desaparece (levando junto \texttt{param}, \texttt{local} e o ponteiro \texttt{msg}), mas \texttt{cont} continua existindo na memória estática. Na segunda chamada, um novo quadro é criado na \textit{Stack}, mas \texttt{cont} retoma de onde parou e passa a valer \texttt{2}.
+
+A tabela a seguir resume e compara as propriedades de cada região de memória:
+
+\begin{center}
+\footnotesize
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Região} & \textbf{Armazena} & \textbf{Valor padrão} & \textbf{Tempo de vida} & \textbf{Controle} \\
+\hline
+\textbf{Text} & Código e literais & Fixo na compilação & Todo o programa & Sistema \\
+\hline
+\textbf{Data} & Globais/\texttt{static} inic. & Valor do código & Todo o programa & Compilador/SO \\
+\hline
+\textbf{BSS} & Globais/\texttt{static} s/ inic. & Sempre \texttt{0} & Todo o programa & Compilador/SO \\
+\hline
+\textbf{Stack} & Locais e parâmetros & Lixo de memória & Execução da função & Automático \\
+\hline
+\textbf{Heap} & Dados dinâmicos & Conforme alocação & Até \texttt{free} & Manual \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{observacao}
+Como todas essas regiões fazem parte do mesmo espaço de endereçamento do processo, você pode usar o operador \texttt{\&} e \texttt{printf("\%p", ...)} para inspecionar os endereços reais de uma função (no \textit{Text}), de uma variável global (em \textit{Data}/\textit{BSS}) e de uma variável local (na \textit{Stack}). Fazer esse teste no seu próprio computador — como propomos nos exercícios a seguir — é uma excelente maneira de comprovar que o diagrama de memória apresentado neste capítulo reflete o comportamento real da máquina.
+\end{observacao}
+
+\section*{Resumo do Capítulo}
+
+Neste capítulo, vimos como o espaço de memória de um processo em C é dividido em cinco regiões fundamentais: \textbf{Text} (instruções e literais somente de leitura), \textbf{Data} (globais e estáticas inicializadas), \textbf{BSS} (globais e estáticas não inicializadas, preenchidas com zero), \textbf{Stack} (quadros de ativação de funções, variáveis locais e parâmetros, com gerenciamento automático) e \textbf{Heap} (memória dinâmica controlada manualmente via ponteiros).
+
+Essa arquitetura unifica as regras que havíamos observado desde o Capítulo 2: explica por que variáveis locais contêm lixo de memória enquanto globais começam em zero, por que variáveis locais desaparecem ao final de uma função, por que modificar uma string literal gera erro de execução e por que devolver o endereço de uma variável local produz um ponteiro pendente. No próximo capítulo, vamos colocar a \textbf{Heap} em ação, aprendendo a alocar, redimensionar e liberar memória dinamicamente em nossos programas.
+
+\begin{objetivos}
+\begin{itemize}
+    \item Descrever as cinco regiões do espaço de memória de um processo (\textit{Text}, \textit{Data}, \textit{BSS}, \textit{Heap} e \textit{Stack}).
+    \item Identificar em qual região de memória cada variável, constante ou função de um programa em C é armazenada.
+    \item Explicar por que variáveis globais/estáticas começam zeradas e variáveis locais contêm lixo de memória.
+    \item Explicar como os quadros de ativação (\textit{stack frames}) são empilhados e desempilhados durante chamadas de função.
+    \item Explicar por que alterar uma string literal ou devolver o endereço de uma variável local são erros graves de memória.
+    \item Diferenciar o gerenciamento automático da \textit{Stack} do gerenciamento manual da \textit{Heap}.
+\end{itemize}
+\end{objetivos}
+
+\section*{Exercícios}
+
+\begin{exercicio}
+
+\subsection*{Exercício 1 --- Fixação}
+Analise o trecho de código abaixo e indique em qual região de memória (\textit{Text}, \textit{Data}, \textit{BSS} ou \textit{Stack}) cada item numerado nos comentários é armazenado:
+
+\begin{lstlisting}
+int taxa = 15;              // (1)
+int acumulador;             // (2)
+
+void processar(int n) {     // (3) parametro n
+    static int vezes = 0;   // (4)
+    int temp = n * 2;       // (5)
+    const char *s = "OK";   // (6) ponteiro s  e  (7) literal "OK"
+}
+\end{lstlisting}
+
+\subsection*{Exercício 2 --- Aplicação (\texttt{static} e tempo de vida)}
+Escreva uma função \texttt{int proximo\_id(void)} que utilize uma variável local \texttt{static} para devolver, a cada chamada, um número sequencial começando em \texttt{1} (\texttt{1} na primeira chamada, \texttt{2} na segunda, \texttt{3} na terceira, e assim por diante), sem usar nenhuma variável global. Teste a função chamando-a dentro de um laço em \texttt{main}.
+
+\subsection*{Exercício 3 --- Rastreamento da Pilha}
+Considere o programa a seguir:
+
+\begin{lstlisting}
+int dobro(int x) {
+    int r = x * 2;
+    return r;
+}
+
+int somar_dobros(int a, int b) {
+    int d1 = dobro(a);
+    int d2 = dobro(b);
+    return d1 + d2;
+}
+
+int main(void) {
+    int resultado = somar_dobros(3, 4);
+    return 0;
+}
+\end{lstlisting}
+
+Desenhe o estado da \textit{Stack} (quais quadros de ativação existem e quais variáveis cada um contém) em três momentos distintos: (a) exatamente durante a execução de \texttt{dobro(a)}; (b) no instante entre o retorno de \texttt{dobro(a)} e a chamada de \texttt{dobro(b)}; (c) durante a execução de \texttt{dobro(b)}.
+
+\subsection*{Exercício 4 --- Inspeção Prática de Endereços}
+Escreva um programa em C que declare: uma variável global inicializada, uma variável global não inicializada, uma variável local \texttt{static}, uma variável local comum em \texttt{main} e um ponteiro para uma string literal. Utilize \texttt{printf} com \texttt{\%p} (e \textit{cast} para \texttt{(void *)}) para exibir os endereços de todas elas, além do endereço da própria função \texttt{main}. Compare os valores hexadecimais impressos e verifique como as regiões ficam agrupadas na memória.
+
+\subsection*{Exercício 5 --- Desafio}
+Explique detalhadamente, usando o conceito de quadros de ativação na \textit{Stack}, por que a função abaixo está incorreta — e por que, curiosamente, um \texttt{printf("\%s\textbackslash n", s)} logo na primeira linha após a chamada em \texttt{main} às vezes ainda parece ``funcionar por acaso'', mas falha assim que outra função é chamada na sequência:
+
+\begin{lstlisting}
+char *criar_saudacao(void) {
+    char mensagem[20] = "Bom dia!";
+    return mensagem;
+}
+\end{lstlisting}
+
+\end{exercicio}

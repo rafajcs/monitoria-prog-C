@@ -1,0 +1,489 @@
+\chapter{Alocação Dinâmica}
+
+No Capítulo 8, aprendemos a manipular endereços de memória por meio de ponteiros. No Capítulo 9, vimos que o espaço de memória de um processo possui uma região especial — a \textbf{Heap} — na qual os dados não estão presos ao tamanho fixo da compilação nem desaparecem automaticamente quando uma função termina.
+
+Neste capítulo, vamos unir essas duas peças. Se você já programou em Python, está acostumado a criar uma lista vazia e adicionar elementos livremente com \texttt{append}: o próprio interpretador solicita mais espaço na \textit{Heap} e libera a memória antiga sem que você perceba. Em C, esse controle está inteiramente em nossas mãos, por meio de quatro funções da biblioteca padrão \texttt{<stdlib.h>}: \texttt{malloc}, \texttt{calloc}, \texttt{realloc} e \texttt{free}.
+
+\section{Por que Alocar Memória Dinamicamente?}
+\label{sec:por-que-alocar}
+
+Até agora, sempre que precisamos de um vetor em C, declaramos seu tamanho diretamente no código-fonte, como em \texttt{int notas[50];}. Essa abordagem — em que o espaço é reservado na \textit{Stack} (se local) ou em \textit{Data}/\textit{BSS} (se global) — funciona para problemas pequenos, mas esbarra em três limitações práticas:
+
+\begin{enumerate}
+    \item \textbf{O tamanho real dos dados só é conhecido durante a execução:} imagine um programa que lê os dados de uma turma ou de um arquivo. Se declararmos um vetor fixo de 100 posições e o usuário precisar processar 105 elementos, o programa não conseguirá atendê-lo; se declararmos 100.000 posições ``por precaução'' e o usuário usar apenas 20, desperdiçaremos quase toda a memória reservada.
+    \item \textbf{Dados criados em uma função precisam sobreviver ao seu retorno:} como vimos nos Capítulos 6 e 9, um vetor local declarado na \textit{Stack} deixa de existir assim que a função executa \texttt{return}. Se quisermos escrever uma função que crie um novo vetor (ou uma nova string) e o devolva para quem a chamou, esse bloco de memória \textbf{precisa} ser alocado na \textit{Heap}.
+    \item \textbf{Estruturas que crescem, encolhem ou ocupam muito espaço:} a \textit{Stack} tem espaço limitado (poucos megabytes). Quando um programa precisa armazenar grandes volumes de dados ou ajustar a quantidade de memória conforme novas informações chegam, a \textit{Heap} é o lugar adequado.
+\end{enumerate}
+
+Alocar memória dinamicamente significa pedir ao sistema, em tempo de execução, um bloco na \textit{Heap} com o tamanho exato necessário naquele momento — e devolvê-lo assim que ele não for mais útil.
+
+\section{A Função \texttt{malloc()}}
+\label{sec:funcao-malloc}
+
+A função mais fundamental para reservar memória na \textit{Heap} é \texttt{malloc} (de \textit{memory allocation}), declarada no cabeçalho \texttt{<stdlib.h>}:
+
+\begin{lstlisting}
+#include <stdlib.h>
+
+void *malloc(size_t tamanho_em_bytes);
+\end{lstlisting}
+
+A função \texttt{malloc} recebe como argumento a \textbf{quantidade de bytes} que desejamos reservar na \textit{Heap} e devolve o \textbf{endereço do primeiro byte} do bloco alocado.
+
+Como o tamanho de um tipo pode variar entre arquiteturas diferentes, \textbf{nunca} devemos passar o número de bytes ``no chute'' (como \texttt{malloc(4)}). Em vez disso, usamos sempre o operador \texttt{sizeof}:
+
+\begin{lstlisting}
+int *p = malloc(sizeof(int));
+\end{lstlisting}
+
+Vale observar três detalhes essenciais sobre o funcionamento de \texttt{malloc}:
+
+\begin{itemize}
+    \item \textbf{Tipo de retorno \texttt{void *}:} como \texttt{malloc} não sabe se os bytes solicitados serão usados para guardar um \texttt{int}, um \texttt{double} ou uma estrutura, ela devolve um \textbf{ponteiro genérico} (\texttt{void *}). Em C, um \texttt{void *} é convertido automaticamente para qualquer tipo de ponteiro na atribuição — sem necessidade de \textit{cast}.
+    \item \textbf{Memória não inicializada:} assim como variáveis na \textit{Stack}, o bloco reservado por \texttt{malloc} \textbf{não é limpo}: ele começa contendo ``lixo de memória''. Cabe ao programador inicializar os valores antes de lê-los.
+    \item \textbf{Possibilidade de falha (\texttt{NULL}):} se não houver memória livre suficiente na \textit{Heap} para atender ao pedido, \texttt{malloc} não encerra o programa — ela devolve \texttt{NULL}.
+\end{itemize}
+
+Por esse último motivo, toda alocação dinâmica deve ser acompanhada de uma verificação antes de usar o ponteiro:
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int *p = malloc(sizeof(int));
+    if (p == NULL) {
+        printf("Erro: memoria insuficiente.\n");
+        return 1;
+    }
+
+    *p = 42;
+    printf("Valor na Heap: %d\n", *p);
+
+    free(p);
+    return 0;
+}
+\end{lstlisting}
+
+\begin{errocomum}
+Esquecer de multiplicar pelo \texttt{sizeof} do tipo ao alocar espaço para vários elementos:
+\begin{lstlisting}
+int *v = malloc(10);              // ERRADO: reserva apenas 10 bytes!
+int *v = malloc(10 * sizeof(int)); // CORRETO: reserva espaco para 10 ints (40 bytes)
+\end{lstlisting}
+Em um sistema em que cada \texttt{int} ocupa 4 bytes, \texttt{malloc(10)} reserva espaço suficiente para apenas dois inteiros e meio. Quando o programa tentar acessar \texttt{v[3]} em diante, estará escrevendo fora do bloco alocado, corrompendo a \textit{Heap}.
+\end{errocomum}
+
+\section{A Função \texttt{calloc()}}
+\label{sec:funcao-calloc}
+
+Em muitos algoritmos — como contadores de frequência, acumuladores ou matrizes recém-criadas —, queremos que a memória alocada na \textit{Heap} já comece \textbf{totalmente preenchida com zeros}. Para isso, \texttt{<stdlib.h>} oferece a função \texttt{calloc} (de \textit{contiguous allocation} ou \textit{cleared allocation}):
+
+\begin{lstlisting}
+void *calloc(size_t quantidade, size_t tamanho_elemento);
+\end{lstlisting}
+
+A função \texttt{calloc} se diferencia de \texttt{malloc} em dois aspectos:
+
+\begin{enumerate}
+    \item \textbf{Recebe dois argumentos separados:} a quantidade de elementos desejada e o tamanho em bytes de cada elemento (em vez de uma única multiplicação).
+    \item \textbf{Zera toda a memória alocada:} todos os bytes do bloco devolvido são garantidamente inicializados com \texttt{0}.
+\end{enumerate}
+
+Compare as duas chamadas abaixo para reservar espaço para 50 números inteiros:
+
+\begin{lstlisting}
+int *a = malloc(50 * sizeof(int)); // 50 ints contendo lixo de memoria
+int *b = calloc(50, sizeof(int));  // 50 ints todos inicializados com 0
+\end{lstlisting}
+
+Se você vai preencher imediatamente todas as posições do vetor (por exemplo, lendo dados com \texttt{scanf}), \texttt{malloc} evita o trabalho extra de zerar a memória antes. Se, por outro lado, o algoritmo depende de valores iniciais zerados, \texttt{calloc} é mais segura e expressiva. Assim como \texttt{malloc}, \texttt{calloc} também devolve \texttt{NULL} caso a alocação falhe.
+
+\section{A Função \texttt{realloc()}}
+\label{sec:funcao-realloc}
+
+E se alocarmos um bloco na \textit{Heap} para 10 elementos e, no meio da execução, descobrirmos que precisamos de espaço para 20? Para redimensionar um bloco já alocado (para mais ou para menos) sem perder os dados que já estavam lá dentro, usamos a função \texttt{realloc}:
+
+\begin{lstlisting}
+void *realloc(void *ptr, size_t novo_tamanho_em_bytes);
+\end{lstlisting}
+
+Ela recebe o ponteiro \texttt{ptr} para o bloco atual na \textit{Heap} e o \textbf{novo tamanho total em bytes}. Internamente, \texttt{realloc} pode agir de duas maneiras:
+
+\begin{enumerate}
+    \item \textbf{Expansão no próprio local:} se houver espaço livre suficiente logo após o bloco atual na \textit{Heap}, \texttt{realloc} apenas estende o bloco existente e devolve o \textbf{mesmo endereço}.
+    \item \textbf{Realocação para um novo endereço:} se não houver espaço livre contíguo suficiente ali, \texttt{realloc} reserva um \textbf{novo bloco} maior em outra parte da \textit{Heap}, \textbf{copia automaticamente} todos os dados antigos para o bloco novo, \textbf{libera o bloco antigo} e devolve o \textbf{novo endereço}.
+\end{enumerate}
+
+Há uma regra crítica de segurança ao usar \texttt{realloc}: se não houver memória disponível para o novo tamanho, \texttt{realloc} devolve \texttt{NULL}, mas \textbf{não libera o bloco original} — os dados antigos continuam intactos no endereço anterior.
+
+\begin{errocomum}
+Atribuir o resultado de \texttt{realloc} diretamente ao único ponteiro que guarda o bloco original:
+\begin{lstlisting}
+// PERIGOSO: se realloc devolver NULL, perdemos o endereco original de v!
+v = realloc(v, 20 * sizeof(int));
+\end{lstlisting}
+Se \texttt{realloc} falhar e devolver \texttt{NULL}, a variável \texttt{v} será sobrescrita com \texttt{NULL}. Com isso, você perde a única referência para o bloco original, que continua alocado na \textit{Heap} sem que ninguém possa acessá-lo ou liberá-lo.
+
+A forma correta e segura é guardar o retorno em um ponteiro auxiliar e só atualizar o ponteiro principal após confirmar que a realocação teve sucesso:
+\begin{lstlisting}
+int *temp = realloc(v, 20 * sizeof(int));
+if (temp == NULL) {
+    // falha: 'v' ainda aponta para os dados originais!
+    free(v);
+    return 1;
+}
+v = temp; // sucesso: atualiza 'v' para o bloco redimensionado
+\end{lstlisting}
+\end{errocomum}
+
+\section{A Função \texttt{free()}}
+\label{sec:funcao-free}
+
+Diferente da \textit{Stack}, a memória alocada na \textit{Heap} não é devolvida automaticamente quando uma função chega ao fim. Para devolver um bloco alocado ao sistema e permitir que aquele espaço seja reutilizado, usamos a função \texttt{free}:
+
+\begin{lstlisting}
+void free(void *ptr);
+\end{lstlisting}
+
+A regra de ouro da alocação dinâmica em C é direta:
+
+\begin{quote}
+\textit{Para cada bloco alocado com \texttt{malloc} ou \texttt{calloc} (e eventualmente redimensionado com \texttt{realloc}), deve existir exatamente uma chamada correspondente a \texttt{free} quando o bloco não for mais necessário.}
+\end{quote}
+
+É fundamental compreender o que acontece — e o que \textbf{não} acontece — quando chamamos \texttt{free(p)}:
+
+\begin{itemize}
+    \item \texttt{free(p)} avisa ao gerenciador da \textit{Heap} que o bloco que começa no endereço guardado em \texttt{p} está livre e pode ser reaproveitado em futuras alocações.
+    \item \texttt{free(p)} \textbf{não modifica o valor da variável \texttt{p}}. Lembre-se do Capítulo 4: \texttt{p} é passado por valor para \texttt{free}. Depois que \texttt{free(p)} termina, a variável \texttt{p} (na \textit{Stack}) continua guardando exatamente o mesmo número de endereço de antes — mas agora aquele endereço aponta para uma memória que já não pertence a você.
+\end{itemize}
+
+Por isso, uma excelente prática após liberar um ponteiro que ainda permanecerá em escopo é atribuir \texttt{NULL} a ele imediatamente:
+
+\begin{lstlisting}
+free(p);
+p = NULL; // evita que p seja usado acidentalmente depois de liberado
+\end{lstlisting}
+
+O próprio padrão da linguagem C garante que chamar \texttt{free(NULL)} é seguro e não faz nada — o que ajuda a evitar liberações duplicadas acidentais.
+
+\section{Alocação Dinâmica de Vetores}
+\label{sec:alocacao-vetores}
+
+No Capítulo 8, vimos que \texttt{v[i]} é apenas uma forma legível de escrever \texttt{*(v + i)}. Como \texttt{malloc} e \texttt{calloc} reservam um bloco \textbf{contíguo} de bytes na \textit{Heap}, um ponteiro que aponta para o início desse bloco pode ser usado exatamente como um vetor comum, com o operador de colchetes \texttt{[]}!
+
+Veja um exemplo completo de um programa que pergunta ao usuário quantos valores deseja armazenar, aloca um vetor sob medida na \textit{Heap}, calcula a soma e libera a memória ao final:
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int n;
+    printf("Quantos numeros deseja armazenar? ");
+    scanf("%d", &n);
+
+    int *vetor = malloc(n * sizeof(int));
+    if (vetor == NULL) {
+        printf("Erro ao alocar memoria.\n");
+        return 1;
+    }
+
+    for (int i = 0; i < n; i++) {
+        vetor[i] = (i + 1) * 10;
+    }
+
+    int soma = 0;
+    for (int i = 0; i < n; i++) {
+        soma += vetor[i];
+    }
+    printf("Soma dos %d elementos: %d\n", n, soma);
+
+    free(vetor);
+    vetor = NULL;
+    return 0;
+}
+\end{lstlisting}
+
+Na memória, a variável \texttt{vetor} (um único ponteiro de 8 bytes em arquiteturas de 64 bits) fica na \textit{Stack} de \texttt{main}, enquanto os \texttt{n} inteiros ficam lado a lado na \textit{Heap}:
+
+\begin{center}
+\small
+\texttt{
+\begin{tabular}{ccc}
+\begin{tabular}{|c|}
+\hline
+\textbf{Stack (\texttt{main})} \\
+\hline
+n = 4 \\
+vetor = 0x8000 \\
+\hline
+\end{tabular}
+&
+$\longrightarrow$
+&
+\begin{tabular}{|c|c|c|c|}
+\hline
+\multicolumn{4}{|c|}{\textbf{Heap} (\texttt{n * sizeof(int)} bytes)} \\
+\hline
+[0]=10 & [1]=20 & [2]=30 & [3]=40 \\
+\hline
+\end{tabular}
+\end{tabular}
+}
+\end{center}
+
+\section{Alocação Dinâmica de Matrizes}
+\label{sec:alocacao-matrizes}
+
+Quando precisamos alocar uma matriz cujas dimensões (\texttt{linhas} e \texttt{colunas}) só são conhecidas em tempo de execução, existem duas abordagens clássicas em C.
+
+\subsection{Abordagem 1: Vetor de ponteiros (\texttt{int **})}
+
+Nesta abordagem, construímos uma matriz em dois níveis na \textit{Heap}:
+
+\begin{enumerate}
+    \item Alocamos primeiro um vetor de \textbf{ponteiros para \texttt{int}} (\texttt{int **}), em que cada posição representará uma linha da matriz.
+    \item Em seguida, usamos um laço para alocar, para cada linha \texttt{i}, um vetor de \texttt{colunas} inteiros.
+\end{enumerate}
+
+\begin{center}
+\texttt{
+\begin{tabular}{ccc}
+\begin{tabular}{|c|}
+\hline
+\textbf{Stack} \\
+\hline
+mat (int **) \\
+\hline
+\end{tabular}
+& $\longrightarrow$ &
+\begin{tabular}{|c|l|}
+\hline
+\multicolumn{2}{|c|}{\textbf{Heap: vetor de linhas} (\texttt{int *})} \\
+\hline
+mat[0] & $\longrightarrow$ \texttt{[ [0][0] | [0][1] | [0][2] ]} \\
+\hline
+mat[1] & $\longrightarrow$ \texttt{[ [1][0] | [1][1] | [1][2] ]} \\
+\hline
+\end{tabular}
+\end{tabular}
+}
+\end{center}
+
+A grande vantagem dessa estrutura é permitir o acesso natural com dois colchetes, \texttt{mat[i][j]}:
+
+\begin{lstlisting}
+int linhas = 3, colunas = 4;
+
+// 1. Aloca o vetor de ponteiros (um para cada linha)
+int **mat = malloc(linhas * sizeof(int *));
+
+// 2. Aloca cada linha individualmente
+for (int i = 0; i < linhas; i++) {
+    mat[i] = malloc(colunas * sizeof(int));
+}
+
+// Uso normal com dois indices
+mat[1][2] = 99;
+
+// 3. Liberacao na ORDEM INVERSA: primeiro cada linha, depois o vetor de linhas
+for (int i = 0; i < linhas; i++) {
+    free(mat[i]);
+}
+free(mat);
+\end{lstlisting}
+
+\begin{errocomum}
+Chamar \texttt{free(mat)} antes de liberar as linhas \texttt{mat[i]}:
+\begin{lstlisting}
+free(mat); // ERRADO: destroi o vetor de ponteiros primeiro!
+for (int i = 0; i < linhas; i++) {
+    free(mat[i]); // ERRO: mat ja foi liberado; os enderecos das linhas foram perdidos!
+}
+\end{lstlisting}
+Sempre que uma estrutura dinâmica é alocada em múltiplos passos (de fora para dentro), a liberação deve ocorrer na \textbf{ordem estritamente inversa} (de dentro para fora): primeiro liberamos cada linha \texttt{mat[i]}, e só por último liberamos \texttt{mat}.
+\end{errocomum}
+
+\subsection{Abordagem 2: Bloco único contíguo (\texttt{int *})}
+
+Como vimos no Capítulo 7, uma matriz \texttt{linhas x colunas} na memória é, conceitualmente, uma sequência de \texttt{linhas * colunas} elementos dispostos linha após linha (\textit{row-major}). Podemos aplicar exatamente essa ideia na \textit{Heap} fazendo uma \textbf{única alocação}:
+
+\begin{lstlisting}
+int *mat = malloc(linhas * colunas * sizeof(int));
+
+// Acessando a linha i, coluna j:
+mat[i * colunas + j] = 99;
+
+// Uma unica chamada a free libera tudo:
+free(mat);
+\end{lstlisting}
+
+Embora exija escrever a fórmula \texttt{i * colunas + j} no índice, essa abordagem garante que toda a matriz fique em um único bloco contíguo de memória, requer apenas um \texttt{malloc} e um \texttt{free}, e evita a sobrecarga de armazenar um vetor extra de ponteiros.
+
+\section{Gerenciamento e Propriedade da Memória}
+\label{sec:propriedade-memoria}
+
+À medida que um programa cresce e passa a ter várias funções trabalhando juntas, surge uma pergunta fundamental de projeto: \textbf{quem é o responsável por chamar \texttt{free}?}
+
+Em C, costumamos organizar o código pensando em termos de \textbf{propriedade da memória} (\textit{ownership}). Existem dois padrões principais:
+
+\begin{enumerate}
+    \item \textbf{Alocação para uso interno:} uma função aloca memória na \textit{Heap} apenas como rascunho auxiliar para realizar um cálculo. Nesse caso, a própria função é dona do bloco e \textbf{deve chamar \texttt{free} antes de retornar}.
+    \item \textbf{Função ``fábrica'' (transferência de propriedade):} uma função tem como objetivo criar um novo objeto na \textit{Heap} e devolver seu endereço para quem a chamou. Nesse caso, a função aloca e inicializa o bloco, devolve o ponteiro, e \textbf{quem chamou a função passa a ser o dono da memória}, assumindo a obrigação de chamar \texttt{free} quando terminar de usá-la.
+\end{enumerate}
+
+Esse segundo padrão resolve, de forma limpa e definitiva, o problema que deixamos em aberto nos Capítulos 6 e 9 sobre devolver vetores ou strings criados dentro de uma função:
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stdlib.h>
+
+int *criar_progressao(int n, int passo) {
+    int *v = malloc(n * sizeof(int));
+    if (v == NULL) {
+        return NULL;
+    }
+
+    for (int i = 0; i < n; i++) {
+        v[i] = i * passo;
+    }
+    return v; // seguro: o bloco vive na Heap, nao na Stack!
+}
+
+int main(void) {
+    int *seq = criar_progressao(5, 10);
+    if (seq == NULL) {
+        return 1;
+    }
+
+    for (int i = 0; i < 5; i++) {
+        printf("%d ", seq[i]);
+    }
+    printf("\n");
+
+    free(seq); // main recebeu a propriedade do bloco e o libera ao final
+    return 0;
+}
+\end{lstlisting}
+
+\section{Vazamentos de Memória e Ponteiros Pendentes}
+\label{sec:vazamentos-ponteiros-pendentes}
+
+Quando o ciclo de vida da memória na \textit{Heap} não é respeitado, surgem duas famílias clássicas de problemas que todo programador C precisa saber diagnosticar.
+
+\subsection{Vazamento de memória (\textit{Memory Leak})}
+
+Um \textbf{vazamento de memória} ocorre quando um bloco é alocado na \textit{Heap}, mas o programa perde todos os ponteiros que guardavam o seu endereço sem ter chamado \texttt{free}. Isso acontece de duas formas comuns:
+
+\begin{itemize}
+    \item uma função aloca memória em um ponteiro local e termina sem chamar \texttt{free} nem devolver o ponteiro;
+    \item um ponteiro que guardava o endereço de um bloco alocado recebe outro endereço por cima antes de o bloco anterior ser liberado:
+\end{itemize}
+
+\begin{lstlisting}
+int *p = malloc(sizeof(int)); // bloco 1 alocado
+p = malloc(sizeof(int));      // VAZAMENTO: endereco do bloco 1 foi sobrescrito e perdido!
+free(p);                      // libera apenas o bloco 2
+\end{lstlisting}
+
+Em um programa pequeno que roda por um segundo e termina, o sistema operacional recupera toda a memória do processo ao final. Mas em programas que ficam rodando continuamente — como servidores, sistemas operacionais ou sistemas embarcados —, pequenos vazamentos repetidos acumulam-se até esgotar toda a memória disponível da máquina.
+
+\subsection{Ponteiros pendentes (\textit{Dangling Pointers}), \textit{Use-After-Free} e \textit{Double Free}}
+
+O extremo oposto do vazamento é tentar continuar usando um bloco depois que ele já foi liberado:
+
+\begin{itemize}
+    \item \textbf{Acesso após liberação (\textit{Use-After-Free}):} ler ou escrever em \texttt{*p} depois de \texttt{free(p)}. Como aquele espaço na \textit{Heap} já pode ter sido entregue a outra parte do programa, acessá-lo corrompe dados silenciosamente.
+    \item \textbf{Dupla liberação (\textit{Double Free}):} chamar \texttt{free(p)} duas vezes seguidas para o mesmo bloco, o que corrompe as estruturas internas do gerenciador da \textit{Heap} e encerra o programa.
+\end{itemize}
+
+\section{Erros Comuns}
+\label{sec:alocacao-erros-comuns}
+
+Reunimos abaixo as armadilhas mais frequentes ao trabalhar com alocação dinâmica em C:
+
+\begin{itemize}
+    \item Esquecer de incluir \texttt{<stdlib.h>} antes de usar \texttt{malloc}, \texttt{calloc}, \texttt{realloc} ou \texttt{free}.
+    \item Passar apenas a quantidade de elementos para \texttt{malloc(n)}, esquecendo de multiplicar por \texttt{sizeof(tipo)}.
+    \item Não verificar se \texttt{malloc}, \texttt{calloc} ou \texttt{realloc} devolveu \texttt{NULL} antes de desreferenciar o ponteiro.
+    \item Assumir que a memória devolvida por \texttt{malloc} começa zerada (apenas \texttt{calloc} garante inicialização com zero).
+    \item Fazer \texttt{p = realloc(p, ...)} diretamente, correndo o risco de perder o bloco original se \texttt{realloc} devolver \texttt{NULL}.
+    \item Esquecer de reservar 1 byte extra para o terminador \texttt{'\textbackslash 0'} ao alocar uma string dinamicamente (\texttt{malloc((tam + 1) * sizeof(char))}).
+    \item Chamar \texttt{free} em um ponteiro que não veio da \textit{Heap} (como o endereço de uma variável local da \textit{Stack} ou de um vetor estático).
+    \item Liberar o vetor principal \texttt{free(mat)} de uma matriz dinâmica antes de liberar cada uma de suas linhas \texttt{free(mat[i])}.
+\end{itemize}
+
+\section*{Resumo do Capítulo}
+
+Com este capítulo, concluímos a Parte III da apostila. Aprendemos por que a alocação dinâmica na \textit{Heap} é indispensável sempre que o tamanho dos dados só é conhecido em tempo de execução ou quando os dados precisam continuar existindo após o término da função que os criou. Estudamos as quatro funções de \texttt{<stdlib.h>} — \texttt{malloc} (alocação simples), \texttt{calloc} (alocação inicializada com zero), \texttt{realloc} (redimensionamento seguro) e \texttt{free} (liberação) — e vimos como aplicá-las para construir vetores e matrizes dinâmicas.
+
+Por fim, discutimos o conceito de propriedade da memória e os dois grandes perigos do gerenciamento manual: vazamentos de memória (\textit{memory leaks}) e ponteiros pendentes (\textit{use-after-free} e \textit{double free}). A partir da Parte IV, usaremos esse domínio sobre ponteiros e alocação dinâmica para criar nossos próprios tipos compostos (\texttt{struct}), organizar programas em múltiplos arquivos e construir estruturas de dados dinâmicas, como listas encadeadas, pilhas e filas.
+
+\begin{objetivos}
+\begin{itemize}
+    \item Explicar em quais situações a alocação dinâmica na \textit{Heap} é necessária em vez da \textit{Stack}.
+    \item Utilizar \texttt{malloc} e \texttt{calloc} com \texttt{sizeof}, verificando sempre se o retorno é \texttt{NULL}.
+    \item Redimensionar blocos de memória com segurança utilizando \texttt{realloc} e um ponteiro auxiliar.
+    \item Liberar corretamente a memória alocada com \texttt{free}, evitando vazamentos e ponteiros pendentes.
+    \item Alocar, percorrer e liberar vetores e matrizes de dimensões definidas em tempo de execução.
+    \item Escrever funções que alocam dados na \textit{Heap} e devolvem seu endereço com segurança ao chamador.
+\end{itemize}
+\end{objetivos}
+
+\section*{Exercícios}
+
+\begin{exercicio}
+
+\subsection*{Exercício 1 --- Fixação}
+Escreva um programa que leia um número inteiro \texttt{n} digitado pelo usuário, aloque dinamicamente um vetor de \texttt{n} valores do tipo \texttt{double} usando \texttt{malloc}, leia os \texttt{n} valores, exiba a média aritmética entre eles e libere a memória ao final. Não se esqueça de verificar se a alocação teve sucesso.
+
+\subsection*{Exercício 2 --- Aplicação (\texttt{calloc})}
+Escreva um programa que simule a contagem de votos de uma eleição com \texttt{k} candidatos (numerados de \texttt{0} a \texttt{k - 1}), em que \texttt{k} é informado pelo usuário no início. Utilize \texttt{calloc} para criar o vetor de contadores já zerado, leia votos em um laço até que o usuário digite \texttt{-1}, exiba o total de votos de cada candidato e libere a memória.
+
+\subsection*{Exercício 3 --- Aplicação (\texttt{realloc})}
+Escreva um programa que leia números inteiros digitados pelo usuário (até que ele digite \texttt{0}) sem perguntar a quantidade de antemão. Comece alocando um vetor na \textit{Heap} com capacidade para apenas 2 inteiros; sempre que o vetor encher, dobre sua capacidade usando \texttt{realloc} de forma segura (com ponteiro temporário). Ao final, exiba todos os números lidos, quantas vezes o vetor precisou crescer e libere a memória.
+
+\subsection*{Exercício 4 --- Transferência de Propriedade (Strings na Heap)}
+Implemente uma função \texttt{char *duplicar\_string(const char *origem)} que calcule o comprimento de \texttt{origem}, aloque na \textit{Heap} o espaço exato necessário (incluindo o \texttt{'\textbackslash 0'}), copie os caracteres e devolva o endereço da nova string. Em \texttt{main}, teste a função, exiba a cópia e libere a memória devolvida.
+
+\subsection*{Exercício 5 --- Integrador (Matrizes Dinâmicas)}
+Escreva duas funções:
+\begin{itemize}
+    \item \texttt{int **criar\_matriz(int linhas, int colunas)}, que aloca dinamicamente uma matriz de inteiros na \textit{Heap} (inicializada com zeros) e devolve seu ponteiro;
+    \item \texttt{void liberar\_matriz(int **mat, int linhas)}, que libera todas as linhas e, por fim, o vetor de ponteiros.
+\end{itemize}
+Em \texttt{main}, leia as dimensões digitadas pelo usuário, crie a matriz, preencha cada posição \texttt{mat[i][j]} com \texttt{i + j}, imprima a tabela resultante e libere a matriz.
+
+\subsection*{Exercício 6 --- Desafio}
+O programa abaixo contém \textbf{quatro problemas graves} relacionados à alocação dinâmica de memória. Identifique cada um deles, explique o que acontece durante a execução e reescreva o programa corrigindo todos os erros:
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+char *criar_copia_maiuscula(const char *texto) {
+    int n = strlen(texto);
+    char *copia = malloc(n);
+
+    for (int i = 0; i <= n; i++) {
+        if (texto[i] >= 'a' && texto[i] <= 'z') {
+            copia[i] = texto[i] - 32;
+        } else {
+            copia[i] = texto[i];
+        }
+    }
+    free(copia);
+    return copia;
+}
+
+int main(void) {
+    char *s = criar_copia_maiuscula("programacao c");
+    printf("%s\n", s);
+    return 0;
+}
+\end{lstlisting}
+
+\end{exercicio}
